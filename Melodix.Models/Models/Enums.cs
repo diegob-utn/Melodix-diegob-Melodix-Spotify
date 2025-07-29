@@ -63,4 +63,15 @@ namespace Melodix.Models
                 Hombre = 0,
                 Mujer = 1
         }
+
+        public enum GeneroMusica
+        {
+                Desconocido = 0,
+                Rock = 1,
+                Pop = 2,
+                Jazz = 3,
+                Clasica = 4,
+                HipHop = 5,
+                Electronica = 6
+        }
 }

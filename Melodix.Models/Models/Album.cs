@@ -15,9 +15,6 @@ namespace Melodix.Models
         [MaxLength(255)]
         public string? UrlPortada { get; set; }
 
-        [MaxLength(255)]
-        public string? RutaImagen { get; set; }
-
         [MaxLength(500)]
         public string? Descripcion { get; set; }
 

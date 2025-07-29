@@ -8,7 +8,8 @@
         <div class="col-12">
             <div class="d-flex align-items-end mb-4">
                 <div class="playlist-cover me-4">
-                    <div class="bg-gradient-primary d-flex align-items-center justify-content-center" style="width: 232px; height: 232px; border-radius: 8px;">
+                    <div class="bg-gradient-primary d-flex align-items-center justify-content-center"
+                        style="width: 232px; height: 232px; border-radius: 8px;">
                         <i class="bi bi-music-note-list text-white" style="font-size: 80px;"></i>
                     </div>
                 </div>
@@ -20,10 +21,9 @@
                         <p class="text-muted mb-3">@Model.Descripcion</p>
                     }
                     <div class="d-flex align-items-center">
-                        <img src="@(Model.Propietario?.FotoPerfil ?? "/images/default-avatar.png")" 
-                             alt="@Model.Propietario?.Nombre" 
-                             class="rounded-circle me-2" 
-                             style="width: 24px; height: 24px;">
+                        <img src="@(Model.Propietario?.FotoPerfil ?? "/images/default-avatar.png")"
+                            alt="@Model.Propietario?.Nombre" class="rounded-circle me-2"
+                            style="width: 24px; height: 24px;">
                         <span class="fw-semibold">@Model.Propietario?.Nombre</span>
                         <span class="text-muted mx-2">•</span>
                         <span class="text-muted">@Model.Pistas.Count canciones</span>
@@ -55,18 +55,20 @@
                         @if (Model.EsPropietario)
                         {
                             <li><a class="dropdown-item" href="@Url.Action("Editar", new { id = Model.Id })">
-                                <i class="bi bi-pencil me-2"></i>Editar detalles
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
+                                    <i class="bi bi-pencil me-2"></i>Editar detalles
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item text-danger" href="#" onclick="eliminarPlaylist(@Model.Id)">
-                                <i class="bi bi-trash me-2"></i>Eliminar playlist
-                            </a></li>
+                                    <i class="bi bi-trash me-2"></i>Eliminar playlist
+                                </a></li>
                         }
                         else
                         {
                             <li><a class="dropdown-item" href="#" onclick="reportarPlaylist(@Model.Id)">
-                                <i class="bi bi-flag me-2"></i>Reportar
-                            </a></li>
+                                    <i class="bi bi-flag me-2"></i>Reportar
+                                </a></li>
                         }
                     </ul>
                 </div>
@@ -81,9 +83,10 @@
                                 <th scope="col" class="text-muted" style="width: 50px;">#</th>
                                 <th scope="col" class="text-muted">Título</th>
                                 <th scope="col" class="text-muted">Álbum</th>
+                                <th scope="col" class="text-muted">Género</th>
                                 <th scope="col" class="text-muted">Fecha agregada</th>
                                 <th scope="col" class="text-muted text-end" style="width: 120px;">
-                                    <i class="bi bi-clock"></i>
+                                    <i class="bi bi-three-dots"></i>
                                 </th>
                             </tr>
                         </thead>
@@ -93,17 +96,14 @@
                                 var pista = Model.Pistas[i];
                                 <tr class="pista-row" data-pista-id="@pista.Id">
                                     <td class="align-middle">
-                                        <button class="btn btn-link p-0 play-btn" onclick="reproducirPista(@pista.Id, @Model.Id)">
+                                        <button class="btn btn-link p-0 play-btn"
+                                            onclick="reproducirPista(@pista.Id, @Model.Id)">
                                             <span class="track-number">@(i + 1)</span>
                                             <i class="bi bi-play-fill play-icon d-none"></i>
                                         </button>
                                     </td>
                                     <td class="align-middle">
                                         <div class="d-flex align-items-center">
-                                            <img src="@(pista.Album?.UrlPortada ?? pista.Album?.RutaImagen ?? "/images/default-album.png")" 
-                                                 alt="@pista.Album?.Titulo" 
-                                                 class="me-3" 
-                                                 style="width: 40px; height: 40px; border-radius: 4px;">
                                             <div>
                                                 <div class="fw-medium">@pista.Titulo</div>
                                                 <div class="text-muted small">@pista.Album?.Usuario?.Nombre</div>
@@ -111,26 +111,28 @@
                                         </div>
                                     </td>
                                     <td class="align-middle text-muted">
-                                        <a href="@Url.Action("Detalle", "Album", new { id = pista.Album?.Id })" 
-                                           class="text-decoration-none text-muted">@pista.Album?.Titulo</a>
+                                        <a href="@Url.Action("Detalle", "Album", new { id = pista.Album?.Id })"
+                                            class="text-decoration-none text-muted">@(pista.Album?.Titulo ?? "Sin álbum")</a>
                                     </td>
+                                    <td class="align-middle text-muted">@pista.Genero.ToString()</td>
                                     <td class="align-middle text-muted">@pista.CreadoEn.ToString("dd MMM yyyy")</td>
                                     <td class="align-middle text-end">
                                         <div class="d-flex align-items-center justify-content-end">
                                             <button class="btn btn-sm btn-outline-light me-2" onclick="toggleLike(@pista.Id)">
                                                 <i class="bi bi-heart"></i>
                                             </button>
-                                            <span class="text-muted small">@TimeSpan.FromSeconds(pista.Duracion).ToString(@"m\:ss")</span>
                                             @if (Model.EsPropietario)
                                             {
                                                 <div class="dropdown ms-2">
-                                                    <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button"
+                                                        data-bs-toggle="dropdown">
                                                         <i class="bi bi-three-dots-vertical"></i>
                                                     </button>
                                                     <ul class="dropdown-menu">
-                                                        <li><a class="dropdown-item text-danger" href="#" onclick="quitarDeLista(@Model.Id, @pista.Id)">
-                                                            <i class="bi bi-trash me-2"></i>Quitar de esta lista
-                                                        </a></li>
+                                                        <li><a class="dropdown-item text-danger" href="#"
+                                                                onclick="quitarDeLista(@Model.Id, @pista.Id)">
+                                                                <i class="bi bi-trash me-2"></i>Quitar de esta lista
+                                                            </a></li>
                                                     </ul>
                                                 </div>
                                             }
@@ -157,92 +159,297 @@
     </div>
 </div>
 
+<!-- Reproductor de Audio -->
+<div class="player-container fixed-bottom bg-dark border-top border-secondary p-3" id="player-container"
+    style="display: none;">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <img id="player-cover" src="" alt="" class="me-3"
+                        style="width: 56px; height: 56px; border-radius: 4px;">
+                    <div>
+                        <div id="player-title" class="fw-medium text-light"></div>
+                        <div id="player-artist" class="text-muted small"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <button id="prev-btn" class="btn btn-link text-light me-3">
+                            <i class="bi bi-skip-backward-fill"></i>
+                        </button>
+                        <button id="play-pause-btn" class="btn btn-success rounded-circle me-3"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+                        <button id="next-btn" class="btn btn-link text-light">
+                            <i class="bi bi-skip-forward-fill"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span id="current-time" class="text-muted small me-2">0:00</span>
+                        <div class="progress flex-grow-1 me-2" style="height: 4px;">
+                            <div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%">
+                            </div>
+                        </div>
+                        <span id="total-time" class="text-muted small">0:00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex justify-content-end align-items-center">
+                    <button class="btn btn-link text-light me-2">
+                        <i class="bi bi-volume-up"></i>
+                    </button>
+                    <div class="progress" style="width: 100px; height: 4px;">
+                        <div id="volume-bar" class="progress-bar bg-light" role="progressbar" style="width: 70%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audio Element -->
+<audio id="audio-player" preload="metadata">
+    Tu navegador no soporta el elemento de audio.
+</audio>
+
 <script>
-function reproducirPista(pistaId, listaId) {
-    // Implementar reproducción
-    console.log('Reproducir pista', pistaId, 'de lista', listaId);
-}
+    // Variables globales del reproductor
+    let currentAudio = null;
+    let isPlaying = false;
+    let currentPlaylist = [];
+    let currentTrackIndex = 0;
 
-function toggleLike(pistaId) {
-    // Implementar like/unlike
-    console.log('Toggle like pista', pistaId);
-}
+    function reproducirPista(pistaId, listaId) {
+        fetch('@Url.Action("ReproducirPista", "Reproductor")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            body: JSON.stringify({ pistaId: pistaId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadTrack(data.pista);
+                    playAudio();
+                } else {
+                    console.error('Error al cargar la pista:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
 
-function toggleSeguir(listaId) {
-    fetch('@Url.Action("ToggleSeguir")', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-        },
-        body: JSON.stringify({ listaId: listaId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const text = document.getElementById('seguir-text');
-            text.textContent = data.estaSiguiendo ? 'Siguiendo' : 'Seguir';
+    function loadTrack(pista) {
+        const audioPlayer = document.getElementById('audio-player');
+        const playerContainer = document.getElementById('player-container');
+        const playerCover = document.getElementById('player-cover');
+        const playerTitle = document.getElementById('player-title');
+        const playerArtist = document.getElementById('player-artist');
+
+        // Actualizar información de la pista
+        audioPlayer.src = pista.urlAudio;
+        playerCover.src = pista.urlPortada || '/images/default-album.png';
+        playerTitle.textContent = pista.titulo;
+        playerArtist.textContent = pista.album.titulo;
+
+        // Mostrar reproductor
+        playerContainer.style.display = 'block';
+
+        // Event listeners para el audio
+        audioPlayer.addEventListener('loadedmetadata', function () {
+            document.getElementById('total-time').textContent = formatTime(audioPlayer.duration);
+        });
+
+        audioPlayer.addEventListener('timeupdate', function () {
+            const currentTime = audioPlayer.currentTime;
+            const duration = audioPlayer.duration;
+            const progress = (currentTime / duration) * 100;
+
+            document.getElementById('current-time').textContent = formatTime(currentTime);
+            document.getElementById('progress-bar').style.width = progress + '%';
+        });
+
+        audioPlayer.addEventListener('ended', function () {
+            nextTrack();
+        });
+    }
+
+    function playAudio() {
+        const audioPlayer = document.getElementById('audio-player');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+
+        audioPlayer.play();
+        isPlaying = true;
+        playPauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+    }
+
+    function pauseAudio() {
+        const audioPlayer = document.getElementById('audio-player');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+
+        audioPlayer.pause();
+        isPlaying = false;
+        playPauseBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+    }
+
+    function togglePlayPause() {
+        if (isPlaying) {
+            pauseAudio();
+        } else {
+            playAudio();
         }
-    });
-}
+    }
 
-function quitarDeLista(listaId, pistaId) {
-    if (confirm('¿Estás seguro de que quieres quitar esta canción de la playlist?')) {
-        fetch('@Url.Action("QuitarPista")', {
+    function nextTrack() {
+        // Implementar siguiente pista
+        fetch('@Url.Action("SiguientePista", "Reproductor")', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadTrack(data.pista);
+                    playAudio();
+                }
+            });
+    }
+
+    function prevTrack() {
+        // Implementar pista anterior
+        fetch('@Url.Action("PistaAnterior", "Reproductor")', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadTrack(data.pista);
+                    playAudio();
+                }
+            });
+    }
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return '0:00';
+
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    // Event listeners para controles del reproductor
+    document.addEventListener('DOMContentLoaded', function () {
+        // Controles del reproductor
+        document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
+        document.getElementById('next-btn').addEventListener('click', nextTrack);
+        document.getElementById('prev-btn').addEventListener('click', prevTrack);
+
+        // Hover effects para las filas de la tabla
+        const rows = document.querySelectorAll('.pista-row');
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', function () {
+                const trackNumber = this.querySelector('.track-number');
+                const playIcon = this.querySelector('.play-icon');
+                trackNumber.classList.add('d-none');
+                playIcon.classList.remove('d-none');
+            });
+
+            row.addEventListener('mouseleave', function () {
+                const trackNumber = this.querySelector('.track-number');
+                const playIcon = this.querySelector('.play-icon');
+                trackNumber.classList.remove('d-none');
+                playIcon.classList.add('d-none');
+            });
+        });
+    });
+
+    function toggleLike(pistaId) {
+        // Implementar like/unlike
+        console.log('Toggle like pista', pistaId);
+    }
+
+    function toggleSeguir(listaId) {
+        fetch('@Url.Action("ToggleSeguir")', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
             },
-            body: JSON.stringify({ listaId: listaId, pistaId: pistaId })
+            body: JSON.stringify({ listaId: listaId })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const text = document.getElementById('seguir-text');
+                    text.textContent = data.estaSiguiendo ? 'Siguiendo' : 'Seguir';
+                }
+            });
     }
-}
 
-function eliminarPlaylist(listaId) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta playlist? Esta acción no se puede deshacer.')) {
-        fetch('@Url.Action("Eliminar")', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-            },
-            body: JSON.stringify({ id: listaId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '@Url.Action("Index", "Biblioteca")';
-            }
-        });
+    function quitarDeLista(listaId, pistaId) {
+        if (confirm('¿Estás seguro de que quieres quitar esta canción de la playlist?')) {
+            fetch('@Url.Action("QuitarPista")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({ listaId: listaId, pistaId: pistaId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+        }
     }
-}
 
-// Hover effects para las filas de la tabla
-document.addEventListener('DOMContentLoaded', function() {
-    const rows = document.querySelectorAll('.pista-row');
-    rows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            const trackNumber = this.querySelector('.track-number');
-            const playIcon = this.querySelector('.play-icon');
-            trackNumber.classList.add('d-none');
-            playIcon.classList.remove('d-none');
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            const trackNumber = this.querySelector('.track-number');
-            const playIcon = this.querySelector('.play-icon');
-            trackNumber.classList.remove('d-none');
-            playIcon.classList.add('d-none');
+    function eliminarPlaylist(listaId) {
+        if (confirm('¿Estás seguro de que quieres eliminar esta playlist? Esta acción no se puede deshacer.')) {
+            fetch('@Url.Action("Eliminar")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({ id: listaId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '@Url.Action("Index", "Biblioteca")';
+                    }
+                });
+        }
+    }
+
+    // Hover effects para las filas de la tabla
+    document.addEventListener('DOMContentLoaded', function () {
+        const rows = document.querySelectorAll('.pista-row');
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', function () {
+                const trackNumber = this.querySelector('.track-number');
+                const playIcon = this.querySelector('.play-icon');
+                trackNumber.classList.add('d-none');
+                playIcon.classList.remove('d-none');
+            });
+
+            row.addEventListener('mouseleave', function () {
+                const trackNumber = this.querySelector('.track-number');
+                const playIcon = this.querySelector('.play-icon');
+                trackNumber.classList.remove('d-none');
+                playIcon.classList.add('d-none');
+            });
         });
     });
-});
 </script>
 
 @Html.AntiForgeryToken()

@@ -1,0 +1,179 @@
+@model Melodix.MVC.ViewModels.SubirPistaViewModel
+
+@{
+    ViewData["Title"] = "Subir Pista";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>
+                        Subir Nueva Pista
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="SubirPista" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="Titulo" class="form-label">
+                                <i class="fas fa-music me-1"></i>
+                                Título de la Pista
+                            </label>
+                            <input asp-for="Titulo" class="form-control" placeholder="Ingresa el título de tu pista" />
+                            <span asp-validation-for="Titulo" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ArchivoAudio" class="form-label">
+                                <i class="fas fa-file-audio me-1"></i>
+                                Archivo de Audio
+                            </label>
+                            <input asp-for="ArchivoAudio" type="file" class="form-control" accept=".mp3,.wav,.flac,.aac,.ogg" />
+                            <div class="form-text">
+                                Formatos soportados: MP3, WAV, FLAC, AAC, OGG. Tamaño máximo: 50MB
+                            </div>
+                            <span asp-validation-for="ArchivoAudio" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Genero" class="form-label">
+                                        <i class="fas fa-tags me-1"></i>
+                                        Género Musical
+                                    </label>
+                                    <select asp-for="Genero" class="form-select" asp-items="Html.GetEnumSelectList<Melodix.Models.GeneroMusica>()">
+                                        <option value="">Selecciona un género</option>
+                                    </select>
+                                    <span asp-validation-for="Genero" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AlbumId" class="form-label">
+                                        <i class="fas fa-compact-disc me-1"></i>
+                                        Álbum (Opcional)
+                                    </label>
+                                    <select asp-for="AlbumId" class="form-select">
+                                        <option value="">Sencillo (sin álbum)</option>
+                                        <!-- Aquí se cargarían los álbumes del usuario -->
+                                    </select>
+                                    <span asp-validation-for="AlbumId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="EsExplicita" type="checkbox" class="form-check-input" id="esExplicita" />
+                                <label asp-for="EsExplicita" class="form-check-label" for="esExplicita">
+                                    <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                                    Contenido explícito
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Marca esta casilla si tu pista contiene lenguaje explícito o contenido para adultos
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-controller="Musica" asp-action="MisPistas" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i>
+                                Subir Pista
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Información Importante
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Asegúrate de tener los derechos de autor de la música que subes
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Los archivos de audio deben estar en buena calidad para una mejor experiencia
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Una vez subida, tu pista estará disponible para reproducción inmediatamente
+                        </li>
+                        <li>
+                            <i class="fas fa-check text-success me-2"></i>
+                            Puedes editar la información de tu pista en cualquier momento
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mostrar preview del archivo seleccionado
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileName = file.name;
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                
+                // Crear elemento de preview
+                let preview = document.getElementById('file-preview');
+                if (!preview) {
+                    preview = document.createElement('div');
+                    preview.id = 'file-preview';
+                    preview.className = 'mt-2 p-2 bg-light rounded';
+                    e.target.parentNode.appendChild(preview);
+                }
+                
+                preview.innerHTML = `
+                    <small class="text-muted">
+                        <i class="fas fa-file-audio me-1"></i>
+                        <strong>${fileName}</strong> (${fileSize} MB)
+                    </small>
+                `;
+            }
+        });
+
+        // Auto-dismiss alerts
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,579 @@
+@using Melodix.Models
+@using Melodix.MVC.ViewModels
+@model MusicPlayerViewModel
+
+@{
+    ViewData["Title"] = "Reproductor de Música";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Panel de Control y Subida -->
+        <div class="col-xl-3 col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-music me-2"></i>
+                        Reproductor de Música
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Controles de Filtro -->
+                    <div class="mb-3">
+                        <label class="form-label small">
+                            <i class="fas fa-filter me-1"></i>
+                            Filtrar por género
+                        </label>
+                        <select id="filtroGenero" class="form-select form-select-sm">
+                            <option value="">Todos los géneros</option>
+                            @foreach (var genero in Model.Generos.Where(g => g != GeneroMusica.Desconocido))
+                            {
+                                <option value="@genero">@genero</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Búsqueda -->
+                    <div class="mb-3">
+                        <label class="form-label small">
+                            <i class="fas fa-search me-1"></i>
+                            Buscar
+                        </label>
+                        <input type="text" id="busqueda" class="form-control form-control-sm" 
+                               placeholder="Título, artista o álbum...">
+                    </div>
+
+                    <!-- Botón de actualizar -->
+                    <button id="btnActualizar" class="btn btn-outline-primary btn-sm w-100 mb-3">
+                        <i id="iconActualizar" class="fas fa-sync-alt me-1"></i>
+                        Actualizar Lista
+                    </button>
+
+                    @if (Model.PuedeSubir)
+                    {
+                        <!-- Sección de Subir Música -->
+                        <hr>
+                        <h6 class="mb-3">
+                            <i class="fas fa-upload me-2"></i>
+                            Subir Nueva Pista
+                        </h6>
+                        
+                        <form id="subirPistaForm" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            
+                            <div class="mb-2">
+                                <input type="file" id="archivoAudio" name="archivo" class="form-control form-control-sm" 
+                                       accept=".mp3,.wav,.flac,.aac,.ogg,.m4a" required>
+                                <div class="form-text">MP3, WAV, FLAC, AAC, OGG, M4A</div>
+                            </div>
+
+                            <div class="mb-2">
+                                <input type="text" id="tituloCancion" name="titulo" class="form-control form-control-sm" 
+                                       placeholder="Título de la canción" required>
+                            </div>
+
+                            <div class="mb-2">
+                                <select id="generoCancion" name="genero" class="form-select form-select-sm" required>
+                                    <option value="">Seleccionar género</option>
+                                    @foreach (var genero in Model.Generos.Where(g => g != GeneroMusica.Desconocido))
+                                    {
+                                        <option value="@((int)genero)">@genero</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-check-sm">
+                                    <input type="checkbox" id="esExplicita" name="esExplicita" class="form-check-input">
+                                    <label class="form-check-label small" for="esExplicita">
+                                        Contenido explícito
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="btnSubir" class="btn btn-success btn-sm w-100">
+                                <i id="iconSubir" class="fas fa-upload me-1"></i>
+                                <span id="textoSubir">Subir Pista</span>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <hr>
+                        <div class="text-center text-muted small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Inicia sesión para subir música
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Estadísticas
+                    </h6>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h5 mb-0 text-primary" id="totalPistas">@Model.Pistas.Count</div>
+                            <small class="text-muted">Pistas</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 mb-0 text-success" id="reproducciones">@Model.Pistas.Sum(p => p.Reproducciones)</div>
+                            <small class="text-muted">Reproducciones</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Reproducción y Reproductor -->
+        <div class="col-xl-9 col-lg-8">
+            <!-- Reproductor Principal -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <div id="infoCancionActual" class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
+                                         style="width: 50px; height: 50px;">
+                                        <i class="fas fa-music text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fw-bold" id="tituloActual">Selecciona una pista</div>
+                                    <small class="text-muted" id="artistaActual">para comenzar</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <!-- Controles de Reproducción -->
+                            <div class="text-center mb-2">
+                                <div class="btn-group" role="group">
+                                    <button id="btnAnterior" class="btn btn-outline-primary" disabled>
+                                        <i class="fas fa-step-backward"></i>
+                                    </button>
+                                    <button id="btnPlayPause" class="btn btn-primary" disabled>
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button id="btnSiguiente" class="btn btn-outline-primary" disabled>
+                                        <i class="fas fa-step-forward"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Barra de Progreso -->
+                            <div class="d-flex align-items-center">
+                                <small id="tiempoActual" class="text-muted me-2">0:00</small>
+                                <div class="progress flex-grow-1 mx-2" style="height: 6px;">
+                                    <div id="barraProgreso" class="progress-bar bg-primary" 
+                                         role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small id="tiempoTotal" class="text-muted ms-2">0:00</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <!-- Control de Volumen -->
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-volume-down me-2"></i>
+                                <input type="range" id="controlVolumen" class="form-range" 
+                                       min="0" max="100" value="50">
+                                <span id="valorVolumen" class="small text-muted ms-2">50%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Pistas -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Lista de Reproducción
+                    </h6>
+                    <small class="text-muted">
+                        <span id="contadorPistas">@Model.Pistas.Count</span> pistas
+                    </small>
+                </div>
+                <div class="card-body p-0">
+                    <div id="listaPistas" class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
+                        @foreach (var pista in Model.Pistas)
+                        {
+                            <div class="list-group-item list-group-item-action pista-item" 
+                                 data-id="@pista.Id" 
+                                 data-titulo="@pista.Titulo" 
+                                 data-artista="@pista.Artista"
+                                 data-ruta="@pista.RutaArchivo"
+                                 style="cursor: pointer;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fas fa-play-circle text-primary play-icon" style="font-size: 1.2em;"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@pista.Titulo</div>
+                                                <small class="text-muted">@pista.Artista • @pista.Album</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block">@pista.Genero</small>
+                                        <small class="text-muted">
+                                            @pista.Reproducciones <i class="fas fa-play fa-xs"></i>
+                                        </small>
+                                        @if (pista.EsExplicita)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6em;">E</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audio Element (Hidden) -->
+<audio id="reproductorAudio" preload="metadata"></audio>
+
+<!-- Toast para Notificaciones -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toastNotificacion" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="fas fa-music me-2"></i>
+            <strong class="me-auto">Reproductor</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="mensajeToast">
+            <!-- Mensaje dinámico -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        class MusicPlayerApp {
+            constructor() {
+                this.audio = document.getElementById('reproductorAudio');
+                this.playlist = [];
+                this.currentIndex = -1;
+                this.isPlaying = false;
+                this.setupEventListeners();
+                this.cargarPlaylist();
+            }
+
+            setupEventListeners() {
+                // Controles del reproductor
+                document.getElementById('btnPlayPause').addEventListener('click', () => this.togglePlayPause());
+                document.getElementById('btnAnterior').addEventListener('click', () => this.anteriorPista());
+                document.getElementById('btnSiguiente').addEventListener('click', () => this.siguientePista());
+
+                // Control de volumen
+                document.getElementById('controlVolumen').addEventListener('input', (e) => {
+                    this.audio.volume = e.target.value / 100;
+                    document.getElementById('valorVolumen').textContent = e.target.value + '%';
+                });
+
+                // Eventos del audio
+                this.audio.addEventListener('timeupdate', () => this.actualizarProgreso());
+                this.audio.addEventListener('ended', () => this.siguientePista());
+                this.audio.addEventListener('loadedmetadata', () => this.actualizarDuracion());
+
+                // Filtros y búsqueda
+                document.getElementById('filtroGenero').addEventListener('change', () => this.cargarPlaylist());
+                document.getElementById('busqueda').addEventListener('input', () => this.buscarConDebounce());
+                document.getElementById('btnActualizar').addEventListener('click', () => this.cargarPlaylist());
+
+                // Subir pista
+                if (document.getElementById('subirPistaForm')) {
+                    document.getElementById('subirPistaForm').addEventListener('submit', (e) => this.subirPista(e));
+                }
+
+                // Clicks en pistas
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('.pista-item')) {
+                        const pistaItem = e.target.closest('.pista-item');
+                        this.reproducirPista(pistaItem);
+                    }
+                });
+            }
+
+            async cargarPlaylist() {
+                const genero = document.getElementById('filtroGenero').value;
+                const busqueda = document.getElementById('busqueda').value;
+                
+                // Mostrar loading
+                const btnActualizar = document.getElementById('btnActualizar');
+                const iconActualizar = document.getElementById('iconActualizar');
+                iconActualizar.className = 'fas fa-spinner fa-spin me-1';
+                btnActualizar.disabled = true;
+
+                try {
+                    const url = new URL('/MusicPlayer/ObtenerPistas', window.location.origin);
+                    if (genero) url.searchParams.append('genero', genero);
+                    if (busqueda) url.searchParams.append('busqueda', busqueda);
+
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.actualizarListaPistas(data.pistas);
+                        this.actualizarEstadisticas(data.pistas);
+                    } else {
+                        this.mostrarToast('Error al cargar las pistas', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.mostrarToast('Error de conexión', 'error');
+                } finally {
+                    iconActualizar.className = 'fas fa-sync-alt me-1';
+                    btnActualizar.disabled = false;
+                }
+            }
+
+            actualizarListaPistas(pistas) {
+                this.playlist = pistas;
+                const container = document.getElementById('listaPistas');
+                
+                container.innerHTML = pistas.map((pista, index) => `
+                    <div class="list-group-item list-group-item-action pista-item" 
+                         data-index="${index}"
+                         data-id="${pista.id}"
+                         data-titulo="${pista.titulo}" 
+                         data-artista="${pista.artista}"
+                         data-ruta="${pista.rutaArchivo}"
+                         style="cursor: pointer;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-play-circle text-primary play-icon" style="font-size: 1.2em;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">${pista.titulo}</div>
+                                        <small class="text-muted">${pista.artista} • ${pista.album}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">${pista.genero}</small>
+                                <small class="text-muted">
+                                    ${pista.reproducciones} <i class="fas fa-play fa-xs"></i>
+                                </small>
+                                ${pista.esExplicita ? '<span class="badge bg-warning text-dark ms-1" style="font-size: 0.6em;">E</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('contadorPistas').textContent = pistas.length;
+            }
+
+            actualizarEstadisticas(pistas) {
+                document.getElementById('totalPistas').textContent = pistas.length;
+                document.getElementById('reproducciones').textContent = 
+                    pistas.reduce((sum, p) => sum + p.reproducciones, 0);
+            }
+
+            reproducirPista(pistaElement) {
+                const index = parseInt(pistaElement.dataset.index);
+                const pista = this.playlist[index];
+                
+                if (!pista) return;
+
+                // Actualizar índice actual
+                this.currentIndex = index;
+
+                // Actualizar información de la pista actual
+                document.getElementById('tituloActual').textContent = pista.titulo;
+                document.getElementById('artistaActual').textContent = pista.artista;
+
+                // Cargar y reproducir audio
+                this.audio.src = pista.rutaArchivo;
+                this.audio.load();
+                this.audio.play();
+                this.isPlaying = true;
+
+                // Actualizar UI
+                this.actualizarBotonPlay();
+                this.marcarPistaActiva(pistaElement);
+                
+                // Habilitar controles
+                document.getElementById('btnPlayPause').disabled = false;
+                document.getElementById('btnAnterior').disabled = this.currentIndex === 0;
+                document.getElementById('btnSiguiente').disabled = this.currentIndex === this.playlist.length - 1;
+
+                // Registrar reproducción
+                this.registrarReproduccion(pista.id);
+            }
+
+            togglePlayPause() {
+                if (this.currentIndex === -1 && this.playlist.length > 0) {
+                    // Si no hay pista seleccionada, reproducir la primera
+                    const primeraPista = document.querySelector('.pista-item');
+                    if (primeraPista) {
+                        this.reproducirPista(primeraPista);
+                    }
+                    return;
+                }
+
+                if (this.isPlaying) {
+                    this.audio.pause();
+                    this.isPlaying = false;
+                } else {
+                    this.audio.play();
+                    this.isPlaying = true;
+                }
+                this.actualizarBotonPlay();
+            }
+
+            anteriorPista() {
+                if (this.currentIndex > 0) {
+                    const anteriorElement = document.querySelector(`[data-index="${this.currentIndex - 1}"]`);
+                    if (anteriorElement) {
+                        this.reproducirPista(anteriorElement);
+                    }
+                }
+            }
+
+            siguientePista() {
+                if (this.currentIndex < this.playlist.length - 1) {
+                    const siguienteElement = document.querySelector(`[data-index="${this.currentIndex + 1}"]`);
+                    if (siguienteElement) {
+                        this.reproducirPista(siguienteElement);
+                    }
+                } else {
+                    // Llegó al final, detener reproducción
+                    this.audio.pause();
+                    this.isPlaying = false;
+                    this.actualizarBotonPlay();
+                }
+            }
+
+            actualizarBotonPlay() {
+                const btn = document.getElementById('btnPlayPause');
+                const icon = btn.querySelector('i');
+                icon.className = this.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+            }
+
+            marcarPistaActiva(activeElement) {
+                // Remover clase activa de todas las pistas
+                document.querySelectorAll('.pista-item').forEach(item => {
+                    item.classList.remove('active');
+                    const icon = item.querySelector('.play-icon');
+                    icon.className = 'fas fa-play-circle text-primary play-icon';
+                });
+
+                // Agregar clase activa a la pista actual
+                activeElement.classList.add('active');
+                const icon = activeElement.querySelector('.play-icon');
+                icon.className = 'fas fa-pause-circle text-success play-icon';
+            }
+
+            actualizarProgreso() {
+                if (this.audio.duration) {
+                    const progreso = (this.audio.currentTime / this.audio.duration) * 100;
+                    document.getElementById('barraProgreso').style.width = progreso + '%';
+                    document.getElementById('tiempoActual').textContent = this.formatearTiempo(this.audio.currentTime);
+                }
+            }
+
+            actualizarDuracion() {
+                document.getElementById('tiempoTotal').textContent = this.formatearTiempo(this.audio.duration);
+            }
+
+            formatearTiempo(segundos) {
+                if (isNaN(segundos)) return '0:00';
+                const mins = Math.floor(segundos / 60);
+                const secs = Math.floor(segundos % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            async registrarReproduccion(pistaId) {
+                try {
+                    await fetch('/MusicPlayer/ReproducirPista', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ pistaId: pistaId })
+                    });
+                } catch (error) {
+                    console.error('Error al registrar reproducción:', error);
+                }
+            }
+
+            async subirPista(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const btnSubir = document.getElementById('btnSubir');
+                const iconSubir = document.getElementById('iconSubir');
+                const textoSubir = document.getElementById('textoSubir');
+
+                // Mostrar loading
+                btnSubir.disabled = true;
+                iconSubir.className = 'fas fa-spinner fa-spin me-1';
+                textoSubir.textContent = 'Subiendo...';
+
+                try {
+                    const response = await fetch('/MusicPlayer/SubirPista', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.mostrarToast(data.message, 'success');
+                        e.target.reset(); // Limpiar formulario
+                        this.cargarPlaylist(); // Recargar lista
+                    } else {
+                        this.mostrarToast(data.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.mostrarToast('Error al subir la pista', 'error');
+                } finally {
+                    btnSubir.disabled = false;
+                    iconSubir.className = 'fas fa-upload me-1';
+                    textoSubir.textContent = 'Subir Pista';
+                }
+            }
+
+            buscarConDebounce() {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => this.cargarPlaylist(), 500);
+            }
+
+            mostrarToast(mensaje, tipo = 'info') {
+                const toast = document.getElementById('toastNotificacion');
+                const mensajeElement = document.getElementById('mensajeToast');
+                
+                mensajeElement.textContent = mensaje;
+                
+                // Cambiar color según tipo
+                toast.className = `toast ${tipo === 'error' ? 'bg-danger text-white' : tipo === 'success' ? 'bg-success text-white' : ''}`;
+                
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+            }
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            new MusicPlayerApp();
+        });
+    </script>
+}

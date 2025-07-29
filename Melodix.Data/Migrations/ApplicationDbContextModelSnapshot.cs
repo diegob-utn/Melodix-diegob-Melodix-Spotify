@@ -35,11 +35,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("FechaLanzamiento")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("RutaImagen")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("SpotifyAlbumId")
                         .HasMaxLength(100)
@@ -98,7 +94,7 @@ namespace Melodix.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("EscuchadaEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("PistaId")
                         .HasColumnType("integer");
@@ -128,7 +124,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Fecha")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("ObjetoId")
                         .HasColumnType("integer");
@@ -156,7 +152,7 @@ namespace Melodix.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AgregadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("ListaId")
                         .HasColumnType("integer");
@@ -185,13 +181,13 @@ namespace Melodix.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("ActualizadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("Colaborativa")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
@@ -236,7 +232,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("ActualizadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Biografia")
                         .HasMaxLength(255)
@@ -247,7 +243,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -257,7 +253,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("FechaNacimiento")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FotoPerfil")
                         .HasMaxLength(255)
@@ -321,7 +317,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("SpotifyTokenExpiration")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
@@ -375,7 +371,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("character varying(12)");
 
                     b.Property<DateTime>("FechaSubida")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("HashArchivo")
                         .HasMaxLength(128)
@@ -428,7 +424,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Fecha")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Mensaje")
                         .IsRequired()
@@ -465,10 +461,10 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("FechaRevision")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("FechaSolicitud")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Mensaje")
                         .HasColumnType("text");
@@ -504,7 +500,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Fecha")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("JsonRespuesta")
                         .HasColumnType("text");
@@ -543,7 +539,7 @@ namespace Melodix.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("ActualizadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("AlbumId")
                         .HasColumnType("integer");
@@ -552,28 +548,24 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Duracion")
-                        .HasColumnType("integer");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("EsExplicita")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("FechaLanzamiento")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("FechaSubida")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("Genero")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("GeneroId")
                         .HasColumnType("integer");
 
                     b.Property<string>("RutaArchivo")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("RutaImagen")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -585,6 +577,10 @@ namespace Melodix.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("UrlArchivo")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("UrlPortada")
                         .HasMaxLength(255)
@@ -623,7 +619,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("MaxCuentas")
                         .HasColumnType("integer");
@@ -658,10 +654,10 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("FechaFin")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("PlanId")
                         .HasColumnType("integer");
@@ -711,11 +707,11 @@ namespace Melodix.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AlbumId")
+                    b.Property<int?>("AlbumId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UsuarioId")
                         .IsRequired()
@@ -740,7 +736,7 @@ namespace Melodix.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("ListaId")
                         .HasColumnType("integer");
@@ -768,7 +764,7 @@ namespace Melodix.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("PistaId")
                         .HasColumnType("integer");
@@ -796,7 +792,7 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Id")
                         .HasColumnType("integer");
@@ -820,7 +816,7 @@ namespace Melodix.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreadoEn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("ListaId")
                         .HasColumnType("integer");
@@ -918,12 +914,10 @@ namespace Melodix.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("text");
@@ -960,12 +954,10 @@ namespace Melodix.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
                         .HasColumnType("text");
@@ -1112,7 +1104,7 @@ namespace Melodix.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Melodix.Models.Genero", "Genero")
+                    b.HasOne("Melodix.Models.Genero", null)
                         .WithMany("Pistas")
                         .HasForeignKey("GeneroId");
 
@@ -1123,8 +1115,6 @@ namespace Melodix.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Album");
-
-                    b.Navigation("Genero");
 
                     b.Navigation("Usuario");
                 });
@@ -1171,9 +1161,7 @@ namespace Melodix.Data.Migrations
                 {
                     b.HasOne("Melodix.Models.Album", "Album")
                         .WithMany("UsuarioLikeAlbums")
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AlbumId");
 
                     b.HasOne("Melodix.Models.Models.ApplicationUser", "Usuario")
                         .WithMany("UsuarioLikeAlbums")

@@ -11,7 +11,7 @@ namespace Melodix.Models
 
         // FKs
         public string UsuarioId { get; set; }
-        public int AlbumId { get; set; }
+        public int? AlbumId { get; set; }
 
         // Navegadores
         public ApplicationUser Usuario { get; set; }

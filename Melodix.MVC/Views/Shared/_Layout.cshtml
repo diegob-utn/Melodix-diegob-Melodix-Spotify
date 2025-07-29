@@ -243,6 +243,8 @@
             color: var(--secondary);
         }
     </style>
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
@@ -260,49 +262,76 @@
                 </a>
 
                 <div class="nav flex-column">
-                    <a class="nav-link" href="@Url.Action("Index", "Inicio")">
-                        <i class="bi bi-house"></i> Inicio
-                    </a>
-                    <a class="nav-link" href="@Url.Action("Index", "Busqueda")">
-                        <i class="bi bi-search"></i> Buscar
-                    </a>
-                    <a class="nav-link" href="@Url.Action("Index", "Biblioteca")">
-                        <i class="bi bi-collection"></i> Tu Biblioteca
-                    </a>
-
-                    <hr class="my-3" style="border-color: var(--line-color);">
-
-                    <a class="nav-link" href="@Url.Action("CrearLista", "Playlist")">
-                        <i class="bi bi-plus-square"></i> Crear Playlist
-                    </a>
-                    <a class="nav-link" href="@Url.Action("Index", "Perfil")">
-                        <i class="bi bi-person"></i> Tu Perfil
-                    </a>
-
-                    @if (User.IsInRole("Musico"))
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
+                        <a class="nav-link" href="@Url.Action("Index", "Inicio")">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                        <a class="nav-link" href="@Url.Action("Index", "Busqueda")">
+                            <i class="bi bi-search"></i> Buscar
+                        </a>
+                        <a class="nav-link" href="@Url.Action("Index", "Biblioteca")">
+                            <i class="bi bi-collection"></i> Tu Biblioteca
+                        </a>
+
                         <hr class="my-3" style="border-color: var(--line-color);">
-                        <a class="nav-link" href="@Url.Action("Dashboard", "Artista")">
-                            <i class="bi bi-music-note"></i> Mi Música
+
+                        <a class="nav-link" href="@Url.Action("CrearLista", "Biblioteca")">
+                            <i class="bi bi-plus-square"></i> Crear Playlist
+                        </a>
+                        <a class="nav-link" href="@Url.Action("Index", "Perfil")">
+                            <i class="bi bi-person"></i> Tu Perfil
+                        </a>
+
+                        @if (User.IsInRole("Musico"))
+                        {
+                            <hr class="my-3" style="border-color: var(--line-color);">
+                            <a class="nav-link" href="@Url.Action("Dashboard", "Artista")">
+                                <i class="bi bi-music-note"></i> Mi Música
+                            </a>
+                        }
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <hr class="my-3" style="border-color: var(--line-color);">
+                            <a class="nav-link" href="@Url.Action("Dashboard", "Admin")">
+                                <i class="bi bi-gear"></i> Administración
+                            </a>
+                        }
+
+                        <hr class="my-3" style="border-color: var(--line-color);">
+
+                        <a class="nav-link" href="@Url.Action("MiPlan", "Suscripcion")">
+                            <i class="bi bi-star"></i> Mi Plan
+                        </a>
+                        <a class="nav-link" href="@Url.Action("Logout", "Cuenta")"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                        </a>
+
+                        <form id="logout-form" asp-action="Logout" asp-controller="Cuenta" method="post"
+                            style="display: none;">
+                            @Html.AntiForgeryToken()
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="nav-link" href="@Url.Action("Login", "Cuenta")">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        </a>
+                        <a class="nav-link" href="@Url.Action("Register", "Cuenta")">
+                            <i class="bi bi-person-plus"></i> Crear Cuenta
+                        </a>
+
+                        <hr class="my-3" style="border-color: var(--line-color);">
+
+                        <a class="nav-link" href="@Url.Action("Index", "Inicio")">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                        <a class="nav-link" href="@Url.Action("Index", "Busqueda")">
+                            <i class="bi bi-search"></i> Buscar
                         </a>
                     }
-
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <hr class="my-3" style="border-color: var(--line-color);">
-                        <a class="nav-link" href="@Url.Action("Dashboard", "Admin")">
-                            <i class="bi bi-gear"></i> Administración
-                        </a>
-                    }
-
-                    <hr class="my-3" style="border-color: var(--line-color);">
-
-                    <a class="nav-link" href="@Url.Action("MiPlan", "Suscripcion")">
-                        <i class="bi bi-star"></i> Mi Plan
-                    </a>
-                    <a class="nav-link" href="@Url.Action("Logout", "Cuenta")">
-                        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-                    </a>
                 </div>
             </div>
         </nav>
@@ -448,7 +477,3 @@
 </body>
 
 </html>
-
-
-           
-               

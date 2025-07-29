@@ -169,7 +169,7 @@
                                     @foreach (var pista in Model.PistasMasPopulares.Take(5))
                                     {
                                         <div class="list-group-item bg-transparent border-secondary d-flex align-items-center">
-                                            <img src="@(pista.Album?.UrlPortada ?? pista.Album?.RutaImagen ?? "/images/default-album.png")" 
+                                            <img src="@(pista.Album?.UrlPortada ?? "/images/default-album.png")" 
                                                  alt="@pista.Titulo" 
                                                  class="me-3" 
                                                  style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">

@@ -55,36 +55,35 @@ namespace Melodix.MVC.Controllers
         }
       }
 
-      var viewModel = new PerfilViewModel
+      var viewModel = new PerfilUsuarioViewModel
       {
         Usuario = usuario,
-        EsPropietario = User.Identity?.Name == usuario.Email,
-        TotalEscuchas = await _context.HistorialesEscucha
+        EsPropioUsuario = User.Identity?.Name == usuario.Email,
+        TotalReproducciones = await _context.HistorialesEscucha
               .CountAsync(h => h.UsuarioId == usuario.Id),
-        TotalListas = await _context.ListasReproduccion
+        TotalPlaylists = await _context.ListasReproduccion
               .CountAsync(l => l.UsuarioId == usuario.Id && l.Publica),
         TotalSeguidores = await _context.UsuariosSigue
               .CountAsync(s => s.SeguidoId == usuario.Id),
         TotalSiguiendo = await _context.UsuariosSigue
               .CountAsync(s => s.SeguidorId == usuario.Id),
-        ListasPublicas = await _context.ListasReproduccion
+        TotalPistas = await _context.Pistas
+              .CountAsync(p => p.UsuarioId == usuario.Id),
+        TotalLikes = await _context.UsuariosLikePista
+              .CountAsync(l => l.UsuarioId == usuario.Id),
+        PlaylistsPublicas = await _context.ListasReproduccion
               .Where(l => l.UsuarioId == usuario.Id && l.Publica)
               .OrderByDescending(l => l.CreadoEn)
               .Take(6)
-              .ToListAsync()
+              .ToListAsync(),
+        PistasPublicas = await _context.Pistas
+              .Where(p => p.UsuarioId == usuario.Id)
+              .Include(p => p.Album)
+              .OrderByDescending(p => p.CreadoEn)
+              .Take(6)
+              .ToListAsync(),
+        EsArtista = usuario.Rol == RolUsuario.Musico
       };
-
-      // Si no es el propietario, verificar si ya lo sigue
-      if (!viewModel.EsPropietario)
-      {
-        var currentUser = await _userManager.GetUserAsync(User);
-        if (currentUser != null)
-        {
-          viewModel.YaSigue = await _context.UsuariosSigue
-              .AnyAsync(s => s.SeguidorId == currentUser.Id && s.SeguidoId == usuario.Id);
-        }
-      }
-
       return View(viewModel);
     }
 

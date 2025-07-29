@@ -97,7 +97,6 @@ namespace Melodix.MVC.Controllers
 
       var query = _context.Pistas
           .Include(p => p.Album)
-          .Include(p => p.Genero)
           .Where(p => p.UsuarioId == usuario.Id);
 
       if (!string.IsNullOrEmpty(buscar))
@@ -157,7 +156,9 @@ namespace Melodix.MVC.Controllers
       }
 
       // Cargar géneros y álbumes del artista
-      var generos = await _context.Generos.ToListAsync();
+      var generos = Enum.GetValues<GeneroMusica>()
+          .Select(g => new { Id = (int)g, Nombre = g.ToString() })
+          .ToList();
       var misAlbumes = await _context.Albums
           .Where(a => a.UsuarioId == usuario.Id)
           .ToListAsync();
@@ -184,7 +185,9 @@ namespace Melodix.MVC.Controllers
       if (!ModelState.IsValid)
       {
         // Recargar datos para la vista
-        ViewBag.Generos = await _context.Generos.ToListAsync();
+        ViewBag.Generos = Enum.GetValues<GeneroMusica>()
+            .Select(g => new { Id = (int)g, Nombre = g.ToString() })
+            .ToList();
         ViewBag.MisAlbumes = await _context.Albums
             .Where(a => a.UsuarioId == usuario.Id)
             .ToListAsync();
@@ -202,9 +205,7 @@ namespace Melodix.MVC.Controllers
 
         // Crear directorios si no existen
         var uploadsPath = Path.Combine(_environment.WebRootPath, "subidos", "audios");
-        var imagenesPath = Path.Combine(_environment.WebRootPath, "subidos", "imagenes");
         Directory.CreateDirectory(uploadsPath);
-        Directory.CreateDirectory(imagenesPath);
 
         // Guardar archivo de audio
         var audioFileName = $"{Guid.NewGuid()}_{model.ArchivoAudio.FileName}";
@@ -215,29 +216,14 @@ namespace Melodix.MVC.Controllers
           await model.ArchivoAudio.CopyToAsync(stream);
         }
 
-        // Guardar imagen si se proporcionó
-        string? imagenFileName = null;
-        if (model.ArchivoImagen != null && model.ArchivoImagen.Length > 0)
-        {
-          imagenFileName = $"{Guid.NewGuid()}_{model.ArchivoImagen.FileName}";
-          var imagenPath = Path.Combine(imagenesPath, imagenFileName);
-
-          using (var stream = new FileStream(imagenPath, FileMode.Create))
-          {
-            await model.ArchivoImagen.CopyToAsync(stream);
-          }
-        }
-
         // Crear nueva pista
         var nuevaPista = new Pista
         {
           Titulo = model.Titulo,
           UsuarioId = usuario.Id,
           AlbumId = model.AlbumId ?? 0,
-          GeneroId = model.GeneroId,
-          Duracion = model.Duracion,
+          Genero = model.Genero,
           RutaArchivo = $"/subidos/audios/{audioFileName}",
-          RutaImagen = imagenFileName != null ? $"/subidos/imagenes/{imagenFileName}" : null,
           FechaSubida = DateTime.UtcNow,
           CreadoEn = DateTime.UtcNow,
           ActualizadoEn = DateTime.UtcNow,
@@ -256,7 +242,9 @@ namespace Melodix.MVC.Controllers
         _logger.LogError(ex, "Error al subir pista para usuario {UserId}", usuario.Id);
         ModelState.AddModelError("", "Error al subir la pista. Inténtalo de nuevo.");
 
-        ViewBag.Generos = await _context.Generos.ToListAsync();
+        ViewBag.Generos = Enum.GetValues<GeneroMusica>()
+            .Select(g => new { Id = (int)g, Nombre = g.ToString() })
+            .ToList();
         ViewBag.MisAlbumes = await _context.Albums
             .Where(a => a.UsuarioId == usuario.Id)
             .ToListAsync();
@@ -278,7 +266,6 @@ namespace Melodix.MVC.Controllers
 
       var pista = await _context.Pistas
           .Include(p => p.Album)
-          .Include(p => p.Genero)
           .FirstOrDefaultAsync(p => p.Id == id && p.UsuarioId == usuario.Id);
 
       if (pista == null)
@@ -291,13 +278,13 @@ namespace Melodix.MVC.Controllers
         Id = pista.Id,
         Titulo = pista.Titulo,
         AlbumId = pista.AlbumId,
-        GeneroId = pista.GeneroId ?? 0,
-        Duracion = pista.Duracion,
-        EsExplicita = pista.EsExplicita,
-        RutaImagenActual = pista.RutaImagen
+        Genero = pista.Genero,
+        EsExplicita = pista.EsExplicita
       };
 
-      ViewBag.Generos = await _context.Generos.ToListAsync();
+      ViewBag.Generos = Enum.GetValues<GeneroMusica>()
+          .Select(g => new { Id = (int)g, Nombre = g.ToString() })
+          .ToList();
       ViewBag.MisAlbumes = await _context.Albums
           .Where(a => a.UsuarioId == usuario.Id)
           .ToListAsync();
@@ -328,7 +315,9 @@ namespace Melodix.MVC.Controllers
 
       if (!ModelState.IsValid)
       {
-        ViewBag.Generos = await _context.Generos.ToListAsync();
+        ViewBag.Generos = Enum.GetValues<GeneroMusica>()
+            .Select(g => new { Id = (int)g, Nombre = g.ToString() })
+            .ToList();
         ViewBag.MisAlbumes = await _context.Albums
             .Where(a => a.UsuarioId == usuario.Id)
             .ToListAsync();
@@ -340,37 +329,8 @@ namespace Melodix.MVC.Controllers
         // Actualizar datos básicos
         pista.Titulo = model.Titulo;
         pista.AlbumId = model.AlbumId ?? 0;
-        pista.GeneroId = model.GeneroId;
-        pista.Duracion = model.Duracion;
+        pista.Genero = model.Genero;
         pista.EsExplicita = model.EsExplicita;
-
-        // Actualizar imagen si se subió una nueva
-        if (model.NuevaImagen != null && model.NuevaImagen.Length > 0)
-        {
-          var imagenesPath = Path.Combine(_environment.WebRootPath, "subidos", "imagenes");
-          Directory.CreateDirectory(imagenesPath);
-
-          var imagenFileName = $"{Guid.NewGuid()}_{model.NuevaImagen.FileName}";
-          var imagenPath = Path.Combine(imagenesPath, imagenFileName);
-
-          using (var stream = new FileStream(imagenPath, FileMode.Create))
-          {
-            await model.NuevaImagen.CopyToAsync(stream);
-          }
-
-          // Eliminar imagen anterior si existía
-          if (!string.IsNullOrEmpty(pista.RutaImagen))
-          {
-            var imagenAnteriorPath = Path.Combine(_environment.WebRootPath,
-                pista.RutaImagen.TrimStart('/'));
-            if (System.IO.File.Exists(imagenAnteriorPath))
-            {
-              System.IO.File.Delete(imagenAnteriorPath);
-            }
-          }
-
-          pista.RutaImagen = $"/subidos/imagenes/{imagenFileName}";
-        }
 
         await _context.SaveChangesAsync();
 
@@ -382,7 +342,9 @@ namespace Melodix.MVC.Controllers
         _logger.LogError(ex, "Error al editar pista {PistaId}", model.Id);
         ModelState.AddModelError("", "Error al actualizar la pista. Inténtalo de nuevo.");
 
-        ViewBag.Generos = await _context.Generos.ToListAsync();
+        ViewBag.Generos = Enum.GetValues<GeneroMusica>()
+            .Select(g => new { Id = (int)g, Nombre = g.ToString() })
+            .ToList();
         ViewBag.MisAlbumes = await _context.Albums
             .Where(a => a.UsuarioId == usuario.Id)
             .ToListAsync();
@@ -422,16 +384,6 @@ namespace Melodix.MVC.Controllers
           if (System.IO.File.Exists(audioPath))
           {
             System.IO.File.Delete(audioPath);
-          }
-        }
-
-        if (!string.IsNullOrEmpty(pista.RutaImagen))
-        {
-          var imagenPath = Path.Combine(_environment.WebRootPath,
-              pista.RutaImagen.TrimStart('/'));
-          if (System.IO.File.Exists(imagenPath))
-          {
-            System.IO.File.Delete(imagenPath);
           }
         }
 
@@ -523,29 +475,12 @@ namespace Melodix.MVC.Controllers
 
       try
       {
-        // Guardar imagen si se proporcionó
-        string? imagenFileName = null;
-        if (model.ArchivoImagen != null && model.ArchivoImagen.Length > 0)
-        {
-          var imagenesPath = Path.Combine(_environment.WebRootPath, "subidos", "imagenes");
-          Directory.CreateDirectory(imagenesPath);
-
-          imagenFileName = $"{Guid.NewGuid()}_{model.ArchivoImagen.FileName}";
-          var imagenPath = Path.Combine(imagenesPath, imagenFileName);
-
-          using (var stream = new FileStream(imagenPath, FileMode.Create))
-          {
-            await model.ArchivoImagen.CopyToAsync(stream);
-          }
-        }
-
         var nuevoAlbum = new Album
         {
           Titulo = model.Titulo,
           UsuarioId = usuario.Id,
           FechaLanzamiento = model.FechaLanzamiento,
-          Descripcion = model.Descripcion,
-          RutaImagen = imagenFileName != null ? $"/subidos/imagenes/{imagenFileName}" : null
+          Descripcion = model.Descripcion
         };
 
         _context.Albums.Add(nuevoAlbum);

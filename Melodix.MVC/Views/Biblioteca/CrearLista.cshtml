@@ -1,0 +1,153 @@
+@model Melodix.MVC.ViewModels.PlaylistViewModel
+
+@{
+  ViewData["Title"] = "Crear Lista de Reproducción";
+}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">
+            <i class="bi bi-plus-circle me-2" style="color: var(--accent);"></i>
+            Crear Nueva Lista de Reproducción
+          </h4>
+        </div>
+        <div class="card-body">
+          <form asp-action="CrearLista" method="post" enctype="multipart/form-data">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="mb-3">
+                  <label asp-for="Nombre" class="form-label">Nombre de la Lista</label>
+                  <input asp-for="Nombre" class="form-control" placeholder="Mi lista increíble">
+                  <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                  <label asp-for="Descripcion" class="form-label">Descripción</label>
+                  <textarea asp-for="Descripcion" class="form-control" rows="3"
+                    placeholder="Describe tu lista de reproducción..."></textarea>
+                  <span asp-validation-for="Descripcion" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-check mb-3">
+                      <input asp-for="Publica" class="form-check-input" type="checkbox" checked>
+                      <label asp-for="Publica" class="form-check-label">
+                        <i class="bi bi-globe me-1"></i>
+                        Lista pública
+                      </label>
+                      <div class="form-text">Otros usuarios podrán ver y seguir tu lista</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check mb-3">
+                      <input asp-for="Colaborativa" class="form-check-input" type="checkbox">
+                      <label asp-for="Colaborativa" class="form-check-label">
+                        <i class="bi bi-people me-1"></i>
+                        Lista colaborativa
+                      </label>
+                      <div class="form-text">Otros usuarios podrán agregar canciones</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="text-center">
+                  <div class="mb-3">
+                    <label class="form-label">Imagen de la Lista</label>
+                    <div class="playlist-image-preview mb-3">
+                      <img id="imagePreview" src="/images/default-playlist.png" alt="Vista previa"
+                        class="img-fluid rounded" style="max-width: 200px; max-height: 200px; object-fit: cover;">
+                    </div>
+                    <input type="file" id="imagenLista" name="ImagenLista" class="form-control" accept="image/*"
+                      onchange="previewImage(this)">
+                    <div class="form-text">JPG, PNG o GIF (máx. 5MB)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between">
+              <a href="@Url.Action("Index", "Biblioteca")" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>
+                Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle me-1"></i>
+                Crear Lista
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('imagePreview').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Validación del formulario
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.querySelector('form');
+      const nombreInput = document.querySelector('#Nombre');
+
+      form.addEventListener('submit', function (e) {
+        if (nombreInput.value.trim() === '') {
+          e.preventDefault();
+          nombreInput.focus();
+          alert('El nombre de la lista es obligatorio');
+        }
+      });
+    });
+  </script>
+}
+
+@section Styles {
+  <style>
+    .playlist-image-preview {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      transition: border-color 0.3s ease;
+    }
+
+    .playlist-image-preview:hover {
+      border-color: var(--accent);
+    }
+
+    .form-check-input:checked {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+  </style>
+}
+
+                   
+                       
+                        

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Melodix.Models;
 using Melodix.Models.Models;
 using Melodix.MVC.ViewModels;
@@ -82,10 +83,34 @@ namespace Melodix.MVC.Controllers
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
     {
+      _logger.LogInformation("Attempting to register user with email: {Email}", model.Email);
       ViewData["ReturnUrl"] = returnUrl;
 
       if (!ModelState.IsValid)
       {
+        _logger.LogWarning("Model state is invalid for user registration: {Email}", model.Email);
+
+        // Log specific validation errors
+        foreach (var modelError in ModelState)
+        {
+          var key = modelError.Key;
+          var errors = modelError.Value.Errors;
+          foreach (var error in errors)
+          {
+            _logger.LogError("Validation error for field {Field}: {Error}", key, error.ErrorMessage);
+          }
+        }
+
+        return View(model);
+      }
+
+      // Check if Nick is already taken
+      var existingUser = await _userManager.Users
+        .FirstOrDefaultAsync(u => u.Nick == model.Nick);
+
+      if (existingUser != null)
+      {
+        ModelState.AddModelError(nameof(model.Nick), "El nombre de usuario ya está en uso");
         return View(model);
       }
 
@@ -95,16 +120,21 @@ namespace Melodix.MVC.Controllers
         Email = model.Email,
         Nombre = model.Nombre,
         Nick = model.Nick,
+        FechaNacimiento = model.FechaNacimiento,
+        Genero = model.Genero,
         Rol = RolUsuario.Usuario,
         Activo = true,
         Verificado = false,
-        CreadoEn = DateTime.UtcNow
+        CreadoEn = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
       };
 
       var result = await _userManager.CreateAsync(user, model.Password);
 
       if (result.Succeeded)
       {
+        // Add user to the "Usuario" role
+        await _userManager.AddToRoleAsync(user, "Usuario");
+
         _logger.LogInformation("Usuario {Email} creó una nueva cuenta con contraseña", model.Email);
 
         await _signInManager.SignInAsync(user, isPersistent: false);
@@ -113,6 +143,8 @@ namespace Melodix.MVC.Controllers
 
       foreach (var error in result.Errors)
       {
+        _logger.LogError("Error creating user {Email}: {ErrorCode} - {ErrorDescription}",
+          model.Email, error.Code, error.Description);
         ModelState.AddModelError(string.Empty, error.Description);
       }
 

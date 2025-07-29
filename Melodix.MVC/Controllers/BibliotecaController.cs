@@ -13,35 +13,42 @@ namespace Melodix.MVC.Controllers
   /// Controlador para mostrar contenido guardado por el usuario (listas, favoritos)
   /// Modelos principales: ListaReproduccion, UsuarioLikePista, UsuarioLikeAlbum, UsuarioSigueLista
   /// </summary>
-  [Authorize]
+  [AllowAnonymous]
   public class BibliotecaController : Controller
   {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDbContext _context;
     private readonly ILogger<BibliotecaController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
     public BibliotecaController(
         UserManager<ApplicationUser> userManager,
         ApplicationDbContext context,
-        ILogger<BibliotecaController> logger)
+        ILogger<BibliotecaController> logger,
+        IWebHostEnvironment environment)
     {
       _userManager = userManager;
       _context = context;
       _logger = logger;
+      _environment = environment;
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index(string filtro = "todo")
     {
       var usuario = await _userManager.GetUserAsync(User);
-      if (usuario == null)
-      {
-        return RedirectToAction("Login", "Cuenta");
-      }
 
       var viewModel = new BibliotecaViewModel
       {
         UsuarioActual = usuario
       };
+
+      if (usuario == null)
+      {
+        // Si no hay usuario autenticado, mostrar biblioteca vacía
+        ViewBag.FiltroActual = filtro;
+        return View(viewModel);
+      }
 
       switch (filtro.ToLower())
       {
@@ -145,6 +152,7 @@ namespace Melodix.MVC.Controllers
     /// Crear nueva lista de reproducción
     /// </summary>
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult CrearLista()
     {
       return View(new PlaylistViewModel());
@@ -152,6 +160,7 @@ namespace Melodix.MVC.Controllers
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [AllowAnonymous]
     public async Task<IActionResult> CrearLista(PlaylistViewModel model)
     {
       if (!ModelState.IsValid)
@@ -159,30 +168,39 @@ namespace Melodix.MVC.Controllers
         return View(model);
       }
 
-      var usuario = await _userManager.GetUserAsync(User);
-      if (usuario == null)
+      try
       {
-        return RedirectToAction("Login", "Cuenta");
+        var usuario = await _userManager.GetUserAsync(User);
+        if (usuario == null)
+        {
+          return RedirectToAction("Login", "Cuenta");
+        }
+
+        var nuevaLista = new ListaReproduccion
+        {
+          Nombre = model.Nombre,
+          Descripcion = model.Descripcion ?? string.Empty,
+          Publica = model.Publica,
+          Colaborativa = model.Colaborativa,
+          UsuarioId = usuario.Id,
+          CreadoEn = DateTime.UtcNow,
+          ActualizadoEn = DateTime.UtcNow,
+          SpotifyListaId = string.Empty,
+          Sincronizada = false
+        };
+
+        _context.ListasReproduccion.Add(nuevaLista);
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Lista de reproducción creada exitosamente";
+        return RedirectToAction("Detalle", "Playlist", new { id = nuevaLista.Id });
       }
-
-      var nuevaLista = new ListaReproduccion
+      catch (Exception ex)
       {
-        Nombre = model.Nombre,
-        Descripcion = model.Descripcion ?? string.Empty,
-        Publica = model.Publica,
-        Colaborativa = model.Colaborativa,
-        UsuarioId = usuario.Id,
-        CreadoEn = DateTime.UtcNow,
-        ActualizadoEn = DateTime.UtcNow,
-        SpotifyListaId = string.Empty, // Se puede generar un GUID si es necesario
-        Sincronizada = false
-      };
-
-      _context.ListasReproduccion.Add(nuevaLista);
-      await _context.SaveChangesAsync();
-
-      TempData["Success"] = "Lista de reproducción creada exitosamente";
-      return RedirectToAction("Detalle", "Playlist", new { id = nuevaLista.Id });
+        _logger.LogError(ex, "Error al crear lista de reproducción");
+        ModelState.AddModelError("", "Ocurrió un error al crear la lista de reproducción");
+        return View(model);
+      }
     }
 
     /// <summary>
@@ -190,6 +208,7 @@ namespace Melodix.MVC.Controllers
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [AllowAnonymous]
     public async Task<IActionResult> EliminarLista(int id)
     {
       var usuario = await _userManager.GetUserAsync(User);
@@ -239,6 +258,7 @@ namespace Melodix.MVC.Controllers
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [AllowAnonymous]
     public async Task<IActionResult> QuitarDeFavoritos(int pistaId)
     {
       var usuario = await _userManager.GetUserAsync(User);
@@ -278,6 +298,7 @@ namespace Melodix.MVC.Controllers
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [AllowAnonymous]
     public async Task<IActionResult> QuitarAlbumGuardado(int albumId)
     {
       var usuario = await _userManager.GetUserAsync(User);

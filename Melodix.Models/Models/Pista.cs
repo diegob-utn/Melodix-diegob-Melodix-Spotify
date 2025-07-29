@@ -10,7 +10,6 @@ namespace Melodix.Models
         [Required, MaxLength(200)]
         public string Titulo { get; set; } = string.Empty;
 
-        public int Duracion { get; set; }
         public DateTime CreadoEn { get; set; }
         public DateTime ActualizadoEn { get; set; }
 
@@ -18,13 +17,13 @@ namespace Melodix.Models
         public DateTime FechaSubida { get; set; }
 
         [MaxLength(255)]
+        public string? UrlArchivo { get; set; }
+
+        [MaxLength(255)]
         public string? UrlPortada { get; set; }
 
         [MaxLength(255)]
         public string? RutaArchivo { get; set; }
-
-        [MaxLength(255)]
-        public string? RutaImagen { get; set; }
 
         [MaxLength(100)]
         public string? SpotifyPistaId { get; set; }
@@ -37,8 +36,7 @@ namespace Melodix.Models
         public string UsuarioId { get; set; } = string.Empty;
         public virtual ApplicationUser Usuario { get; set; } = null!;
 
-        public int? GeneroId { get; set; }
-        public virtual Genero? Genero { get; set; }
+        public GeneroMusica Genero { get; set; } = GeneroMusica.Desconocido;
 
         public bool EsExplicita { get; set; }
         public int ContadorReproducciones { get; set; }

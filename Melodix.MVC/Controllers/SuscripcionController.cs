@@ -45,17 +45,17 @@ namespace Melodix.MVC.Controllers
           .OrderBy(p => p.Precio)
           .ToListAsync();
 
-      var suscripcionActual = await _context.Suscripciones
-          .Include(s => s.Plan)
-          .FirstOrDefaultAsync(s => s.UsuarioId == usuario.Id &&
-                                  s.Estado == EstadoSuscripcion.Activa);
+      var suscripcionActual = await _context.SuscripcionesUsuario
+          .Include(su => su.Suscripcion)
+          .ThenInclude(s => s.Plan)
+          .FirstOrDefaultAsync(su => su.UsuarioId == usuario.Id &&
+                                   su.Suscripcion.Estado == EstadoSuscripcion.Activa);
 
-      var viewModel = new SuscripcionViewModel
+      var viewModel = new SuscripcionPlanesViewModel
       {
         Planes = planes,
-        SuscripcionActual = suscripcionActual,
-        Usuario = usuario,
-        TieneSuscripcionActiva = suscripcionActual != null
+        PlanActual = suscripcionActual?.Suscripcion?.Plan,
+        SuscripcionActual = suscripcionActual
       };
 
       return View(viewModel);
@@ -84,9 +84,17 @@ namespace Melodix.MVC.Controllers
           .Take(10)
           .ToListAsync();
 
+      var viewModel = new SuscripcionViewModel
+      {
+        SuscripcionActual = suscripcion,
+        Usuario = usuario,
+        TieneSuscripcionActiva = suscripcion != null,
+        Planes = new List<PlanSuscripcion>() // Lista vacía para esta vista
+      };
+
       ViewBag.HistorialTransacciones = historialTransacciones;
 
-      return View(suscripcion);
+      return View(viewModel);
     }
 
     /// <summary>

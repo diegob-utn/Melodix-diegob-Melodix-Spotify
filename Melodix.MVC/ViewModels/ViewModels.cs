@@ -47,11 +47,6 @@ namespace Melodix.MVC.ViewModels
     [Required(ErrorMessage = "Confirma tu contraseña")]
     [DataType(DataType.Password)]
     [Compare("Password", ErrorMessage = "Las contraseñas no coinciden")]
-    public string ConfirmPassword { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Confirma tu contraseña")]
-    [DataType(DataType.Password)]
-    [Compare("Password", ErrorMessage = "Las contraseñas no coinciden")]
     public string ConfirmarPassword { get; set; } = string.Empty;
 
     [DataType(DataType.Date)]
@@ -273,19 +268,12 @@ namespace Melodix.MVC.ViewModels
     [Display(Name = "Archivo de audio")]
     public IFormFile ArchivoAudio { get; set; } = null!;
 
-    [Display(Name = "Imagen de portada")]
-    public IFormFile? ArchivoImagen { get; set; }
-
     [Display(Name = "Álbum")]
     public int? AlbumId { get; set; }
 
     [Required(ErrorMessage = "Debe seleccionar un género")]
     [Display(Name = "Género")]
-    public int GeneroId { get; set; }
-
-    [Required(ErrorMessage = "La duración es obligatoria")]
-    [Range(1, 3600, ErrorMessage = "La duración debe estar entre 1 y 3600 segundos")]
-    public int Duracion { get; set; }
+    public GeneroMusica Genero { get; set; } = GeneroMusica.Desconocido;
 
     [Display(Name = "Contenido explícito")]
     public bool EsExplicita { get; set; }
@@ -302,21 +290,11 @@ namespace Melodix.MVC.ViewModels
     [Display(Name = "Álbum")]
     public int? AlbumId { get; set; }
 
-    [Required(ErrorMessage = "Debe seleccionar un género")]
     [Display(Name = "Género")]
-    public int GeneroId { get; set; }
-
-    [Required(ErrorMessage = "La duración es obligatoria")]
-    [Range(1, 3600, ErrorMessage = "La duración debe estar entre 1 y 3600 segundos")]
-    public int Duracion { get; set; }
+    public GeneroMusica Genero { get; set; } = GeneroMusica.Desconocido;
 
     [Display(Name = "Contenido explícito")]
     public bool EsExplicita { get; set; }
-
-    [Display(Name = "Nueva imagen")]
-    public IFormFile? NuevaImagen { get; set; }
-
-    public string? RutaImagenActual { get; set; }
   }
 
   public class EstadisticasArtistaViewModel
@@ -348,9 +326,6 @@ namespace Melodix.MVC.ViewModels
     [Required(ErrorMessage = "La fecha de lanzamiento es obligatoria")]
     [Display(Name = "Fecha de lanzamiento")]
     public DateTime FechaLanzamiento { get; set; }
-
-    [Display(Name = "Imagen de portada")]
-    public IFormFile? ArchivoImagen { get; set; }
   }
 
   // === ADMIN VIEWMODELS ===

@@ -83,17 +83,54 @@ namespace Melodix.MVC.Controllers
 
     private async Task<List<Pista>> ObtenerPistasTendencia()
     {
-      // Obtener pistas más escuchadas en los últimos 30 días
-      var fechaLimite = DateTime.UtcNow.AddDays(-30);
+      try
+      {
+        // Obtener pistas más escuchadas en los últimos 30 días
+        var fechaLimite = DateTime.UtcNow.AddDays(-30);
 
-      return await _context.HistorialesEscucha
-          .Where(h => h.EscuchadaEn >= fechaLimite)
-          .GroupBy(h => h.PistaId)
-          .OrderByDescending(g => g.Count())
-          .Take(10)
-          .Select(g => g.First().Pista)
-          .Include(p => p.Album)
-          .ToListAsync();
+        var pistasTendencia = await _context.HistorialesEscucha
+            .Where(h => h.EscuchadaEn >= fechaLimite)
+            .GroupBy(h => h.PistaId)
+            .OrderByDescending(g => g.Count())
+            .Take(10)
+            .Select(g => new { PistaId = g.Key, Conteo = g.Count() })
+            .ToListAsync();
+
+        if (!pistasTendencia.Any())
+        {
+          // Si no hay historial, devolver las pistas más recientes
+          return await _context.Pistas
+              .Include(p => p.Album)
+              .Include(p => p.Usuario)
+              .OrderByDescending(p => p.CreadoEn)
+              .Take(10)
+              .ToListAsync();
+        }
+
+        var pistaIds = pistasTendencia.Select(pt => pt.PistaId).ToList();
+        var pistas = await _context.Pistas
+            .Include(p => p.Album)
+            .Include(p => p.Usuario)
+            .Where(p => pistaIds.Contains(p.Id))
+            .ToListAsync();
+
+        // Ordenar según el conteo de escuchas
+        return pistas
+            .OrderByDescending(p => pistasTendencia.First(pt => pt.PistaId == p.Id).Conteo)
+            .ToList();
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Error al obtener pistas de tendencia");
+
+        // Fallback: devolver las pistas más recientes
+        return await _context.Pistas
+            .Include(p => p.Album)
+            .Include(p => p.Usuario)
+            .OrderByDescending(p => p.CreadoEn)
+            .Take(10)
+            .ToListAsync();
+      }
     }
 
     /// <summary>

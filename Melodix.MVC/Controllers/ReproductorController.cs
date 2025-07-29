@@ -9,10 +9,6 @@ using Melodix.MVC.ViewModels;
 
 namespace Melodix.MVC.Controllers
 {
-  /// <summary>
-  /// Controlador para reproducir pistas, manejar barra de progreso, historial
-  /// Modelos principales: Pista, ArchivoSubido, HistorialEscucha
-  /// </summary>
   [Authorize]
   public class ReproductorController : Controller
   {
@@ -28,6 +24,48 @@ namespace Melodix.MVC.Controllers
       _userManager = userManager;
       _context = context;
       _logger = logger;
+    }
+
+    /// <summary>
+    /// Reproducir una pista específica
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReproducirPista([FromBody] ReproducirPistaRequest request)
+    {
+      var pista = await _context.Pistas
+          .Include(p => p.Album)
+          .Include(p => p.Usuario)
+          .FirstOrDefaultAsync(p => p.Id == request.PistaId);
+
+      if (pista == null)
+      {
+        return Json(new { success = false, message = "Pista no encontrada" });
+      }
+
+      // Verificar si el usuario tiene permisos para acceder a la pista
+      // (por ahora todas son públicas, pero podría implementarse lógica de suscripción)
+
+      var resultado = new
+      {
+        success = true,
+        pista = new
+        {
+          id = pista.Id,
+          titulo = pista.Titulo,
+          duracion = 180, // Default duration in seconds since Duracion field was removed
+          urlPortada = pista.UrlPortada ?? "/images/default-album.png",
+          album = new
+          {
+            id = pista.Album?.Id ?? 0,
+            titulo = pista.Album?.Titulo ?? "Desconocido"
+          },
+          // URL del archivo de audio real
+          urlAudio = pista.RutaArchivo ?? pista.UrlArchivo ?? $"/uploads/audio/{pista.Id}.mp3"
+        }
+      };
+
+      return Json(resultado);
     }
 
     /// <summary>
@@ -113,15 +151,15 @@ namespace Melodix.MVC.Controllers
         {
           id = pista.Id,
           titulo = pista.Titulo,
-          duracion = pista.Duracion,
-          urlPortada = pista.UrlPortada,
+          duracion = 180, // Default duration in seconds since Duracion field was removed
+          urlPortada = pista.UrlPortada ?? "/images/default-album.png",
           album = new
           {
-            id = pista.Album.Id,
-            titulo = pista.Album.Titulo
+            id = pista.Album?.Id ?? 0,
+            titulo = pista.Album?.Titulo ?? "Desconocido"
           },
-          // Aquí iría la URL del archivo de audio
-          urlAudio = $"/subidos/pistas/{pista.SpotifyPistaId}.mp3" // Ejemplo
+          // URL del archivo de audio real
+          urlAudio = pista.RutaArchivo ?? pista.UrlArchivo ?? $"/uploads/audio/{pista.Id}.mp3"
         }
       };
 
@@ -200,14 +238,14 @@ namespace Melodix.MVC.Controllers
         {
           id = siguientePista.Id,
           titulo = siguientePista.Titulo,
-          duracion = siguientePista.Duracion,
-          urlPortada = siguientePista.UrlPortada,
+          duracion = 180, // Default duration in seconds since Duracion field was removed
+          urlPortada = siguientePista.UrlPortada ?? "/images/default-album.png",
           album = new
           {
-            id = siguientePista.Album.Id,
-            titulo = siguientePista.Album.Titulo
+            id = siguientePista.Album?.Id ?? 0,
+            titulo = siguientePista.Album?.Titulo ?? "Desconocido"
           },
-          urlAudio = $"/subidos/pistas/{siguientePista.SpotifyPistaId}.mp3"
+          urlAudio = siguientePista.RutaArchivo ?? siguientePista.UrlArchivo ?? $"/uploads/audio/{siguientePista.Id}.mp3"
         }
       };
 
@@ -257,14 +295,14 @@ namespace Melodix.MVC.Controllers
         {
           id = pistaAnterior.Id,
           titulo = pistaAnterior.Titulo,
-          duracion = pistaAnterior.Duracion,
-          urlPortada = pistaAnterior.UrlPortada,
+          duracion = 180, // Default duration in seconds since Duracion field was removed
+          urlPortada = pistaAnterior.UrlPortada ?? "/images/default-album.png",
           album = new
           {
-            id = pistaAnterior.Album.Id,
-            titulo = pistaAnterior.Album.Titulo
+            id = pistaAnterior.Album?.Id ?? 0,
+            titulo = pistaAnterior.Album?.Titulo ?? "Desconocido"
           },
-          urlAudio = $"/subidos/pistas/{pistaAnterior.SpotifyPistaId}.mp3"
+          urlAudio = pistaAnterior.RutaArchivo ?? pistaAnterior.UrlArchivo ?? $"/uploads/audio/{pistaAnterior.Id}.mp3"
         }
       };
 
@@ -352,4 +390,12 @@ namespace Melodix.MVC.Controllers
       }
     }
   }
+}
+
+/// <summary>
+/// Modelo de request para reproducir pista
+/// </summary>
+public class ReproducirPistaRequest
+{
+  public int PistaId { get; set; }
 }
