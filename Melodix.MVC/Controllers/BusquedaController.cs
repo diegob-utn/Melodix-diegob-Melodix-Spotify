@@ -11,23 +11,26 @@ namespace Melodix.MVC.Controllers
 {
   /// <summary>
   /// Controlador para buscar canciones, artistas, álbumes, listas
-  /// Modelos principales: Pista, Album, ListaReproduccion, ApplicationUser
+  /// Incluye búsqueda en base de datos y archivos locales
   /// </summary>
-  [Authorize]
+  [AllowAnonymous]
   public class BusquedaController : Controller
   {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDbContext _context;
     private readonly ILogger<BusquedaController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
     public BusquedaController(
         UserManager<ApplicationUser> userManager,
         ApplicationDbContext context,
-        ILogger<BusquedaController> logger)
+        ILogger<BusquedaController> logger,
+        IWebHostEnvironment environment)
     {
       _userManager = userManager;
       _context = context;
       _logger = logger;
+      _environment = environment;
     }
 
     public async Task<IActionResult> Index(string? query)
@@ -38,13 +41,32 @@ namespace Melodix.MVC.Controllers
       {
         var queryLower = query.ToLower();
 
-        // Buscar pistas
+        // Buscar pistas en base de datos
         viewModel.Pistas = await _context.Pistas
             .Include(p => p.Album)
-            .Where(p => p.Titulo.ToLower().Contains(queryLower))
+            .Include(p => p.Usuario)
+            .Where(p => p.Titulo.ToLower().Contains(queryLower) ||
+                       (p.Album != null && p.Album.Titulo.ToLower().Contains(queryLower)) ||
+                       p.Usuario.UserName!.ToLower().Contains(queryLower))
             .OrderByDescending(p => p.CreadoEn)
             .Take(20)
             .ToListAsync();
+
+        // Buscar archivos de música locales
+        var archivosLocales = await BuscarArchivosLocales(queryLower);
+
+        // Agregar archivos locales que no estén en la base de datos
+        var pistasLocales = new List<Pista>();
+        foreach (var archivo in archivosLocales)
+        {
+          if (!viewModel.Pistas.Any(p => p.RutaArchivo == archivo.RutaArchivo))
+          {
+            pistasLocales.Add(archivo);
+          }
+        }
+
+        // Combinar resultados
+        viewModel.Pistas = viewModel.Pistas.Concat(pistasLocales).Take(20).ToList();
 
         // Buscar álbumes
         viewModel.Albums = await _context.Albums
@@ -103,9 +125,21 @@ namespace Melodix.MVC.Controllers
             titulo = p.Titulo,
             subtitulo = p.Album.Titulo,
             imagen = p.UrlPortada,
-            url = Url.Action("Reproducir", "Reproductor", new { pistaId = p.Id })
+            url = Url.Action("Index", "MusicPlayer") + $"#{p.Id}"
           })
           .ToListAsync();
+
+      // Agregar archivos locales
+      var archivosLocales = await BuscarArchivosLocales(termLower);
+      var pistasLocales = archivosLocales.Take(3).Select(p => new
+      {
+        tipo = "archivo_local",
+        id = 0,
+        titulo = p.Titulo,
+        subtitulo = "Archivo Local",
+        imagen = "/images/music-default.png",
+        url = p.RutaArchivo
+      });
 
       // Agregar álbumes
       var albums = await _context.Albums
@@ -156,11 +190,12 @@ namespace Melodix.MVC.Controllers
           .ToListAsync();
 
       sugerencias.AddRange(pistas);
+      sugerencias.AddRange(pistasLocales);
       sugerencias.AddRange(albums);
       sugerencias.AddRange(listas);
       sugerencias.AddRange(usuarios);
 
-      return Json(sugerencias.Take(10));
+      return Json(sugerencias.Take(12));
     }
 
     /// <summary>
@@ -182,11 +217,19 @@ namespace Melodix.MVC.Controllers
         case "pistas":
           viewModel.Pistas = await _context.Pistas
               .Include(p => p.Album)
+              .Include(p => p.Usuario)
               .Where(p => p.Titulo.ToLower().Contains(queryLower))
               .OrderByDescending(p => p.CreadoEn)
               .Skip((pagina - 1) * cantidad)
               .Take(cantidad)
               .ToListAsync();
+
+          // Agregar archivos locales si es la primera página
+          if (pagina == 1)
+          {
+            var archivosLocales = await BuscarArchivosLocales(queryLower);
+            viewModel.Pistas = viewModel.Pistas.Concat(archivosLocales).Take(cantidad).ToList();
+          }
           break;
 
         case "albums":
@@ -232,5 +275,107 @@ namespace Melodix.MVC.Controllers
 
       return View("Index", viewModel);
     }
+
+    #region Métodos Auxiliares
+
+    /// <summary>
+    /// Buscar archivos de música en la carpeta local
+    /// </summary>
+    private async Task<List<Pista>> BuscarArchivosLocales(string query)
+    {
+      var archivosEncontrados = new List<Pista>();
+
+      try
+      {
+        var directorioMusica = Path.Combine(_environment.WebRootPath, "uploads", "music");
+
+        if (!Directory.Exists(directorioMusica))
+        {
+          return archivosEncontrados;
+        }
+
+        var extensionesAudio = new[] { ".mp3", ".wav", ".flac", ".aac", ".ogg", ".m4a" };
+
+        var archivos = Directory.GetFiles(directorioMusica, "*.*", SearchOption.TopDirectoryOnly)
+            .Where(archivo => extensionesAudio.Contains(Path.GetExtension(archivo).ToLowerInvariant()))
+            .Where(archivo => string.IsNullOrEmpty(query) ||
+                            Path.GetFileNameWithoutExtension(archivo).ToLower().Contains(query))
+            .Take(20);
+
+        foreach (var rutaArchivo in archivos)
+        {
+          var nombreArchivo = Path.GetFileNameWithoutExtension(rutaArchivo);
+          var extension = Path.GetExtension(rutaArchivo);
+          var rutaRelativa = $"/uploads/music/{Path.GetFileName(rutaArchivo)}";
+
+          // Verificar si ya existe en la base de datos
+          var pistaExistente = await _context.Pistas
+              .FirstOrDefaultAsync(p => p.RutaArchivo == rutaRelativa);
+
+          if (pistaExistente == null)
+          {
+            // Crear pista temporal para mostrar el archivo local
+            var pistaLocal = new Pista
+            {
+              Id = 0, // ID temporal para archivos locales
+              Titulo = LimpiarNombreArchivo(nombreArchivo),
+              RutaArchivo = rutaRelativa,
+              Genero = GeneroMusica.Desconocido,
+              FechaSubida = System.IO.File.GetCreationTime(rutaArchivo),
+              CreadoEn = System.IO.File.GetCreationTime(rutaArchivo),
+              ActualizadoEn = System.IO.File.GetLastWriteTime(rutaArchivo),
+              ContadorReproducciones = 0,
+              EsExplicita = false,
+              UsuarioId = "local", // Identificador para archivos locales
+              Usuario = new ApplicationUser { UserName = "Archivo Local", Id = "local" },
+              Album = new Album { Titulo = "Archivos Locales", Id = 0 }
+            };
+
+            archivosEncontrados.Add(pistaLocal);
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Error al buscar archivos locales con query: {Query}", query);
+      }
+
+      return archivosEncontrados;
+    }
+
+    /// <summary>
+    /// Limpiar nombre de archivo para mostrarlo como título
+    /// </summary>
+    private string LimpiarNombreArchivo(string nombreArchivo)
+    {
+      // Remover GUID si está presente
+      var partes = nombreArchivo.Split('-');
+      if (partes.Length > 1 && Guid.TryParse(partes[0], out _))
+      {
+        return string.Join("-", partes.Skip(1));
+      }
+
+      // Reemplazar guiones y guiones bajos con espacios
+      return nombreArchivo.Replace("-", " ").Replace("_", " ");
+    }
+
+    /// <summary>
+    /// Obtener todos los archivos de música locales
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> ArchivosLocales()
+    {
+      var archivosLocales = await BuscarArchivosLocales("");
+
+      var viewModel = new BusquedaViewModel
+      {
+        Query = "Archivos Locales",
+        Pistas = archivosLocales
+      };
+
+      return View("Index", viewModel);
+    }
+
+    #endregion
   }
 }

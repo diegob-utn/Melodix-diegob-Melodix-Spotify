@@ -13,7 +13,6 @@ namespace Melodix.MVC.Controllers
     /// Controlador para funciones administrativas del sistema
     /// Modelos principales: ApplicationUser, Pista, Album, ListaReproduccion, Genero, PlanSuscripcion
     /// </summary>
-    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;

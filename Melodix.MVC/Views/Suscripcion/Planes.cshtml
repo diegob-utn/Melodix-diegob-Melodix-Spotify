@@ -1,4 +1,4 @@
-@model SuscripcionPlanesViewModel
+@model Melodix.MVC.ViewModels.SuscripcionPlanesViewModel
 @{
     ViewData["Title"] = "Planes de suscripción";
 }
@@ -10,80 +10,275 @@
     </div>
 
     <div class="row justify-content-center">
-        @foreach (var plan in Model.Planes)
-        {
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-secondary bg-dark">
-                    <div class="card-body text-center">
-                        <h3 class="card-title">@plan.Nombre</h3>
-                        <div class="display-4 fw-bold text-primary mb-3">
-                            $@plan.Precio.ToString("F2")
-                            <small class="fs-6 text-muted">/@(plan.DuracionMeses == 1 ? "mes" : plan.DuracionMeses + " meses")</small>
-                        </div>
-                        
-                        <p class="text-muted mb-4">@plan.Descripcion</p>
-                        
-                        <ul class="list-unstyled mb-4">
-                            @if (plan.Precio == 0)
-                            {
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Reproducción con anuncios
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Saltos limitados
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Calidad estándar
-                                </li>
-                            }
-                            else
-                            {
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Reproducción sin anuncios
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Saltos ilimitados
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Descarga offline
-                                </li>
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Calidad alta (@plan.MaxCuentas cuentas)
-                                </li>
-                            }
-                        </ul>
-                        
-                        @if (Model.PlanActual?.Id == plan.Id)
-                        {
-                            <button class="btn btn-success w-100" disabled>
-                                <i class="bi bi-check-circle me-2"></i>
-                                Plan actual
-                            </button>
-                        }
-                        else if (plan.Precio == 0)
-                        {
-                            <button class="btn btn-outline-primary w-100" disabled>
-                                Plan gratuito
-                            </button>
-                        }
-                        else
-                        {
-                            <a href="@Url.Action("Comprar", new { planId = plan.Id })" 
-                               class="btn btn-primary w-100">
-                                Elegir @plan.Nombre
-                            </a>
-                        }
+        <!-- Plan Gratuito -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-secondary bg-dark position-relative">
+                <div class="card-body text-center">
+                    <h3 class="card-title text-white">Melodix Free</h3>
+                    <div class="display-4 fw-bold text-success mb-3">
+                        Gratis
+                        <small class="fs-6 text-muted d-block">Para siempre</small>
                     </div>
+
+                    <p class="text-muted mb-4">Escucha música con anuncios</p>
+
+                    <ul class="list-unstyled mb-4 text-start">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Reproducción con anuncios ocasionales
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            6 saltos por hora
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Reproducción aleatoria en móvil
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Calidad de audio estándar
+                        </li>
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-x-circle me-2"></i>
+                            Sin descarga offline
+                        </li>
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-x-circle me-2"></i>
+                            Sin reproducción bajo demanda en móvil
+                        </li>
+                    </ul>
+
+                    <button class="btn btn-outline-light w-100" disabled>
+                        <i class="bi bi-check-circle me-2"></i>
+                        Plan actual
+                    </button>
                 </div>
             </div>
-        }
+        </div>
+
+        <!-- Plan Premium Individual -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-primary bg-dark position-relative">
+                <div class="badge bg-primary position-absolute top-0 start-50 translate-middle px-3 py-2">
+                    Más Popular
+                </div>
+                <div class="card-body text-center pt-4">
+                    <h3 class="card-title text-white">Premium Individual</h3>
+                    <div class="display-4 fw-bold text-primary mb-3">
+                        $9.99
+                        <small class="fs-6 text-muted d-block">/mes</small>
+                    </div>
+
+                    <p class="text-muted mb-4">Una cuenta premium para ti</p>
+
+                    <ul class="list-unstyled mb-4 text-start">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Música sin anuncios
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Descarga hasta 10,000 pistas
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Reproduce cualquier canción
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Saltos ilimitados
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Calidad de audio alta
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Organiza cola de reproducción
+                        </li>
+                    </ul>
+
+                    <a href="@Url.Action("Comprar", new { planId = "premium-individual" })"
+                        class="btn btn-primary w-100 mb-2">
+                        Elegir Premium Individual
+                    </a>
+                    <small class="text-muted">Cancela cuando quieras</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Premium Estudiante -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-warning bg-dark position-relative">
+                <div class="badge bg-warning text-dark position-absolute top-0 start-50 translate-middle px-3 py-2">
+                    Estudiante
+                </div>
+                <div class="card-body text-center pt-4">
+                    <h3 class="card-title text-white">Premium Estudiante</h3>
+                    <div class="display-4 fw-bold text-warning mb-3">
+                        $4.99
+                        <small class="fs-6 text-muted d-block">/mes</small>
+                    </div>
+
+                    <p class="text-muted mb-4">Descuento especial para estudiantes</p>
+
+                    <ul class="list-unstyled mb-4 text-start">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Todos los beneficios de Premium
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Precio especial estudiante
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Verificación académica requerida
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Renovación anual con verificación
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Acceso a contenido educativo
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Descuentos en conciertos
+                        </li>
+                    </ul>
+
+                    <a href="@Url.Action("Comprar", new { planId = "premium-estudiante" })"
+                        class="btn btn-warning w-100 mb-2">
+                        Elegir Premium Estudiante
+                    </a>
+                    <small class="text-muted">Verificación académica requerida</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Premium Family -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-info bg-dark position-relative">
+                <div class="badge bg-info text-dark position-absolute top-0 start-50 translate-middle px-3 py-2">
+                    Familia
+                </div>
+                <div class="card-body text-center pt-4">
+                    <h3 class="card-title text-white">Premium Family</h3>
+                    <div class="display-4 fw-bold text-info mb-3">
+                        $15.99
+                        <small class="fs-6 text-muted d-block">/mes</small>
+                    </div>
+
+                    <p class="text-muted mb-4">Hasta 6 cuentas premium para la familia</p>
+
+                    <ul class="list-unstyled mb-4 text-start">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            6 cuentas Premium por hogar
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Bloquear música explícita
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Melodix Kids incluido
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Perfiles individuales
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Mix familiar personalizado
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Gestión parental avanzada
+                        </li>
+                    </ul>
+
+                    <a href="@Url.Action("Comprar", new { planId = "premium-family" })" class="btn btn-info w-100 mb-2">
+                        Elegir Premium Family
+                    </a>
+                    <small class="text-muted">Solo miembros del mismo hogar</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparación de características -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">Comparación de características</h3>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th class="text-center">Free</th>
+                            <th class="text-center text-primary">Individual</th>
+                            <th class="text-center text-warning">Estudiante</th>
+                            <th class="text-center text-info">Family</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Anuncios</td>
+                            <td class="text-center"><i class="bi bi-check-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-x-circle text-success"></i></td>
+                            <td class="text-center"><i class="bi bi-x-circle text-success"></i></td>
+                            <td class="text-center"><i class="bi bi-x-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Descargas offline</td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Reproducir cualquier canción</td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Saltos ilimitados</td>
+                            <td class="text-center">6/hora</td>
+                            <td class="text-center"><i class="bi bi-infinity"></i></td>
+                            <td class="text-center"><i class="bi bi-infinity"></i></td>
+                            <td class="text-center"><i class="bi bi-infinity"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Calidad de audio</td>
+                            <td class="text-center">Estándar</td>
+                            <td class="text-center">Alta</td>
+                            <td class="text-center">Alta</td>
+                            <td class="text-center">Alta</td>
+                        </tr>
+                        <tr>
+                            <td>Número de cuentas</td>
+                            <td class="text-center">1</td>
+                            <td class="text-center">1</td>
+                            <td class="text-center">1</td>
+                            <td class="text-center">6</td>
+                        </tr>
+                        <tr>
+                            <td>Control parental</td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     @if (Model.PlanActual != null && Model.PlanActual.Precio > 0)
@@ -112,6 +307,87 @@
         </div>
     }
 
+    <!-- Promociones especiales -->
+    <div class="row justify-content-center mt-5 mb-5">
+        <div class="col-12">
+            <div class="card bg-gradient border-0"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-center py-5">
+                    <h2 class="text-white mb-3">🎵 Promociones especiales</h2>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-white bg-opacity-10 rounded">
+                                <h5 class="text-white">3 meses gratis</h5>
+                                <p class="text-white-50 mb-0">Para nuevos usuarios Premium</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-white bg-opacity-10 rounded">
+                                <h5 class="text-white">Descuento familiar</h5>
+                                <p class="text-white-50 mb-0">20% off primer año Family</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-white bg-opacity-10 rounded">
+                                <h5 class="text-white">Estudiante verificado</h5>
+                                <p class="text-white-50 mb-0">50% descuento permanente</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Garantías y beneficios adicionales -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">✨ Garantías incluidas</h3>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="text-center">
+                        <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-shield-check text-white fs-3"></i>
+                        </div>
+                        <h5>Cancela cuando quieras</h5>
+                        <p class="text-muted">Sin compromisos ni penalizaciones</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="text-center">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-arrow-clockwise text-white fs-3"></i>
+                        </div>
+                        <h5>Cambio de plan flexible</h5>
+                        <p class="text-muted">Actualiza o degrada en cualquier momento</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="text-center">
+                        <div class="bg-info rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-headphones text-white fs-3"></i>
+                        </div>
+                        <h5>Soporte 24/7</h5>
+                        <p class="text-muted">Atención al cliente premium</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="text-center">
+                        <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-star-fill text-white fs-3"></i>
+                        </div>
+                        <h5>Acceso anticipado</h5>
+                        <p class="text-muted">Nuevas funciones antes que nadie</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- FAQ Section -->
     <div class="row justify-content-center mt-5">
         <div class="col-md-10">
@@ -119,39 +395,45 @@
             <div class="accordion" id="faqAccordion">
                 <div class="accordion-item bg-dark border-secondary">
                     <h2 class="accordion-header">
-                        <button class="accordion-button bg-dark text-light border-0" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        <button class="accordion-button bg-dark text-light border-0" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq1">
                             ¿Puedo cambiar de plan en cualquier momento?
                         </button>
                     </h2>
                     <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                         <div class="accordion-body text-muted">
-                            Sí, puedes cambiar tu plan en cualquier momento. Los cambios se aplicarán inmediatamente y se ajustará el costo proporcionalmente.
+                            Sí, puedes cambiar tu plan en cualquier momento. Los cambios se aplicarán inmediatamente y
+                            se ajustará el costo proporcionalmente.
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="accordion-item bg-dark border-secondary">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed bg-dark text-light border-0" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        <button class="accordion-button collapsed bg-dark text-light border-0" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq2">
                             ¿Hay permanencia mínima?
                         </button>
                     </h2>
                     <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                         <div class="accordion-body text-muted">
-                            No, no hay permanencia mínima. Puedes cancelar tu suscripción en cualquier momento y seguir disfrutando del servicio hasta el final del período pagado.
+                            No, no hay permanencia mínima. Puedes cancelar tu suscripción en cualquier momento y seguir
+                            disfrutando del servicio hasta el final del período pagado.
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="accordion-item bg-dark border-secondary">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed bg-dark text-light border-0" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        <button class="accordion-button collapsed bg-dark text-light border-0" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq3">
                             ¿Qué métodos de pago aceptan?
                         </button>
                     </h2>
                     <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                         <div class="accordion-body text-muted">
-                            Aceptamos tarjetas de crédito y débito (Visa, MasterCard, American Express), PayPal y transferencia bancaria.
+                            Aceptamos tarjetas de crédito y débito (Visa, MasterCard, American Express), PayPal y
+                            transferencia bancaria.
                         </div>
                     </div>
                 </div>
@@ -161,9 +443,16 @@
 </div>
 
 <script>
-function cancelarSuscripcion() {
-    if (confirm('¿Estás seguro de que quieres cancelar tu suscripción? Podrás seguir usando el servicio premium hasta el final del período pagado.')) {
-        window.location.href = '@Url.Action("Cancelar")';
+    function cancelarSuscripcion() {
+        if (confirm('¿Estás seguro de que quieres cancelar tu suscripción? Podrás seguir usando el servicio premium hasta el final del período pagado.')) {
+            window.location.href = '@Url.Action("Cancelar")';
+        }
     }
-}
 </script>
+
+                       
+                       
+                       
+                       
+                       
+                                           
