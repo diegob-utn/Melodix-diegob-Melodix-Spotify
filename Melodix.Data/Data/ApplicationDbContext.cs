@@ -18,9 +18,9 @@ namespace Melodix.Data
         }
 
         // DbSets principales (nombres en plural)
-        public DbSet<Artista> Artistas { get; set; }
         public DbSet<Album> Albums { get; set; }
         public DbSet<Pista> Pistas { get; set; }
+        public DbSet<Genero> Generos { get; set; }
         public DbSet<ListaReproduccion> ListasReproduccion { get; set; }
         public DbSet<ListaPista> ListasPista { get; set; }
         public DbSet<HistorialEscucha> HistorialesEscucha { get; set; }
@@ -29,7 +29,6 @@ namespace Melodix.Data
         public DbSet<UsuarioLikeLista> UsuariosLikeLista { get; set; }
         public DbSet<UsuarioLikePista> UsuariosLikePista { get; set; }
         public DbSet<UsuarioSigue> UsuariosSigue { get; set; }
-        public DbSet<UsuarioSigueArtista> UsuariosSigueArtista { get; set; }
         public DbSet<UsuarioSigueLista> UsuariosSigueLista { get; set; }
         public DbSet<PlanSuscripcion> PlanesSuscripcion { get; set; }
         public DbSet<Suscripcion> Suscripciones { get; set; }
@@ -54,8 +53,6 @@ namespace Melodix.Data
             // Índices en campos de búsqueda frecuente
             builder.Entity<ApplicationUser>()
                 .HasIndex(u => u.SpotifyId);
-            builder.Entity<Artista>()
-                .HasIndex(a => a.SpotifyArtistaId);
             builder.Entity<Album>()
                 .HasIndex(a => a.SpotifyAlbumId);
             builder.Entity<Pista>()
@@ -94,10 +91,7 @@ namespace Melodix.Data
                 .HasIndex(x => new { x.UsuarioId, x.PistaId })
                 .IsUnique();
 
-            // Relación muchos-a-muchos UsuarioSigueArtista
-            builder.Entity<UsuarioSigueArtista>()
-                .HasIndex(x => new { x.UsuarioId, x.ArtistaId })
-                .IsUnique();
+            // ...existing code...
             builder.Entity<UsuarioSigueLista>()
                 .HasIndex(x => new { x.UsuarioId, x.ListaId })
                 .IsUnique();
@@ -120,11 +114,7 @@ namespace Melodix.Data
                 .WithMany(u => u.UsuarioLikePistas)
                 .HasForeignKey(ulp => ulp.UsuarioId);
 
-            // Relaciones para UsuarioSigueArtista
-            builder.Entity<UsuarioSigueArtista>()
-                .HasOne(usa => usa.Usuario)
-                .WithMany(u => u.UsuarioSigueArtistas)
-                .HasForeignKey(usa => usa.UsuarioId);
+            // ...existing code...
 
             // Relaciones para UsuarioSigueLista
             builder.Entity<UsuarioSigueLista>()
@@ -210,13 +200,13 @@ namespace Melodix.Data
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            foreach(var entry in ChangeTracker.Entries()
+            foreach (var entry in ChangeTracker.Entries()
                         .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
             {
-                foreach(var property in entry.Properties.Where(p => p.Metadata.ClrType == typeof(DateTime)))
+                foreach (var property in entry.Properties.Where(p => p.Metadata.ClrType == typeof(DateTime)))
                 {
                     var dt = (DateTime)property.CurrentValue;
-                    if(dt.Kind == DateTimeKind.Unspecified)
+                    if (dt.Kind == DateTimeKind.Unspecified)
                     {
                         property.CurrentValue = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
                     }
@@ -225,12 +215,12 @@ namespace Melodix.Data
                         property.CurrentValue = dt.ToUniversalTime();
                     }
                 }
-                foreach(var property in entry.Properties.Where(p => p.Metadata.ClrType == typeof(DateTime?)))
+                foreach (var property in entry.Properties.Where(p => p.Metadata.ClrType == typeof(DateTime?)))
                 {
                     var dt = (DateTime?)property.CurrentValue;
-                    if(dt.HasValue)
+                    if (dt.HasValue)
                     {
-                        if(dt.Value.Kind == DateTimeKind.Unspecified)
+                        if (dt.Value.Kind == DateTimeKind.Unspecified)
                         {
                             property.CurrentValue = DateTime.SpecifyKind(dt.Value, DateTimeKind.Utc);
                         }

@@ -54,7 +54,6 @@ namespace Melodix.Models.Models
         public List<UsuarioLikeAlbum> UsuarioLikeAlbums { get; set; } = new();
         public List<UsuarioLikeLista> UsuarioLikeListas { get; set; } = new();
         public List<UsuarioLikePista> UsuarioLikePistas { get; set; } = new();
-        public List<UsuarioSigueArtista> UsuarioSigueArtistas { get; set; } = new();
         public List<UsuarioSigueLista> UsuarioSigueListas { get; set; } = new();
         public List<HistorialLike> HistorialLikes { get; set; } = new();
         public List<SuscripcionUsuario> SuscripcionUsuarios { get; set; } = new();

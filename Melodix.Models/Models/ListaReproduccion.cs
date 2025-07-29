@@ -1,4 +1,4 @@
-using Melodix.Models.Models;
+    using Melodix.Models.Models;
 
 namespace Melodix.Models
 {
@@ -20,7 +20,7 @@ namespace Melodix.Models
 
         // Navegadores
         public ApplicationUser Usuario { get; set; }
-        public List<ListaPista> ListaPistas { get; set; } = new();
+        public List<ListaPista> ListasPista { get; set; } = new();
         public List<UsuarioLikeLista> UsuarioLikeListas { get; set; } = new();
         public List<UsuarioSigueLista> UsuarioSigueListas { get; set; } = new();
     }

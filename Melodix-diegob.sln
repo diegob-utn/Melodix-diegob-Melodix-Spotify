@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Melodix.Keys", "Melodix.Key
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Melodix.MVC", "Melodix.MVC\Melodix.MVC.csproj", "{AB3BBB73-D50E-40A5-A22C-B47117F13BB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Melodix.Spotify.MVC", "Melodix.Spotify.MVC\Melodix.Spotify.MVC.csproj", "{C29BCED6-6909-477F-A311-080A7AE52D5C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +33,6 @@ Global
 		{AB3BBB73-D50E-40A5-A22C-B47117F13BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB3BBB73-D50E-40A5-A22C-B47117F13BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB3BBB73-D50E-40A5-A22C-B47117F13BB4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C29BCED6-6909-477F-A311-080A7AE52D5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C29BCED6-6909-477F-A311-080A7AE52D5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C29BCED6-6909-477F-A311-080A7AE52D5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C29BCED6-6909-477F-A311-080A7AE52D5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,196 @@
+@model EditPerfilViewModel
+@{
+    ViewData["Title"] = "Editar perfil";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary">
+                    <h4 class="card-title mb-0">Editar perfil</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-4">
+                                <div class="mb-3">
+                                    <img id="preview-foto" 
+                                         src="@(Model.FotoPerfil ?? "/images/default-avatar.png")" 
+                                         alt="Foto de perfil" 
+                                         class="rounded-circle border border-secondary" 
+                                         style="width: 150px; height: 150px; object-fit: cover;">
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ArchivoFoto" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-camera me-2"></i>
+                                        Cambiar foto
+                                    </label>
+                                    <input asp-for="ArchivoFoto" type="file" class="d-none" accept="image/*" onchange="previewImage(this)" />
+                                    <span asp-validation-for="ArchivoFoto" class="text-danger d-block mt-2"></span>
+                                </div>
+                                <small class="text-muted">JPG, PNG o GIF. Máximo 5MB.</small>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Nombre" class="form-label">Nombre completo</label>
+                                        <input asp-for="Nombre" class="form-control bg-dark border-secondary text-light" 
+                                               placeholder="Tu nombre" maxlength="100" />
+                                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Nick" class="form-label">Nombre de usuario</label>
+                                        <input asp-for="Nick" class="form-control bg-dark border-secondary text-light" 
+                                               placeholder="tunick" maxlength="50" />
+                                        <span asp-validation-for="Nick" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Biografia" class="form-label">Biografía</label>
+                                    <textarea asp-for="Biografia" class="form-control bg-dark border-secondary text-light" 
+                                              rows="3" placeholder="Cuéntanos sobre ti..." maxlength="255"></textarea>
+                                    <span asp-validation-for="Biografia" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Ubicacion" class="form-label">Ubicación</label>
+                                        <input asp-for="Ubicacion" class="form-control bg-dark border-secondary text-light" 
+                                               placeholder="Ciudad, País" maxlength="100" />
+                                        <span asp-validation-for="Ubicacion" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="FechaNacimiento" class="form-label">Fecha de nacimiento</label>
+                                        <input asp-for="FechaNacimiento" type="date" 
+                                               class="form-control bg-dark border-secondary text-light" />
+                                        <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Genero" class="form-label">Género</label>
+                                    <select asp-for="Genero" class="form-select bg-dark border-secondary text-light">
+                                        <option value="">Prefiero no especificar</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Femenino">Femenino</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                    <span asp-validation-for="Genero" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-secondary my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    document.getElementById('preview-foto').src = e.target.result;
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Contador de caracteres para biografía
+        document.addEventListener('DOMContentLoaded', function() {
+            const biografiaTextarea = document.querySelector('textarea[name="Biografia"]');
+            if (biografiaTextarea) {
+                const maxLength = 255;
+                const counterDiv = document.createElement('div');
+                counterDiv.className = 'text-muted small mt-1';
+                
+                const updateCounter = () => {
+                    const currentLength = biografiaTextarea.value.length;
+                    counterDiv.innerHTML = `<span id="bio-char-count">${currentLength}</span>/${maxLength} caracteres`;
+                    
+                    if (currentLength > maxLength * 0.9) {
+                        counterDiv.className = 'text-warning small mt-1';
+                    } else {
+                        counterDiv.className = 'text-muted small mt-1';
+                    }
+                };
+                
+                updateCounter();
+                biografiaTextarea.parentNode.appendChild(counterDiv);
+                biografiaTextarea.addEventListener('input', updateCounter);
+            }
+
+            // Validación del nick en tiempo real
+            const nickInput = document.querySelector('input[name="Nick"]');
+            if (nickInput) {
+                nickInput.addEventListener('input', function() {
+                    // Solo permitir letras, números y guiones bajos
+                    this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '');
+                });
+            }
+
+            // Validar fecha de nacimiento (debe ser mayor de 13 años)
+            const fechaNacInput = document.querySelector('input[name="FechaNacimiento"]');
+            if (fechaNacInput) {
+                fechaNacInput.addEventListener('change', function() {
+                    const fechaNac = new Date(this.value);
+                    const hoy = new Date();
+                    const edad = hoy.getFullYear() - fechaNac.getFullYear();
+                    
+                    if (edad < 13) {
+                        this.setCustomValidity('Debes tener al menos 13 años para usar esta plataforma');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+        });
+
+        // Validación del archivo de imagen
+        document.querySelector('input[type="file"]').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // Verificar tamaño (5MB máximo)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Verificar tipo de archivo
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Tipo de archivo no válido. Solo se permiten JPG, PNG y GIF.');
+                    this.value = '';
+                    return;
+                }
+            }
+        });
+    </script>
+}

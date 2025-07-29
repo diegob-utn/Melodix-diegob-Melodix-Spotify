@@ -1,0 +1,279 @@
+@model Melodix.MVC.ViewModels.BibliotecaViewModel
+
+@{
+    ViewData["Title"] = "Tu Biblioteca";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Tu Biblioteca</h1>
+            <a href="@Url.Action("CrearLista", "Playlist")" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Crear Playlist
+            </a>
+        </div>
+
+        <!-- Filter Tabs -->
+        <ul class="nav nav-pills mb-4">
+            <li class="nav-item">
+                <a class="nav-link active" href="@Url.Action("Index", "Biblioteca")">
+                    <i class="bi bi-grid"></i> Todo
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="@Url.Action("Index", "Biblioteca", new { tipo = "playlists" })">
+                    <i class="bi bi-collection-play"></i> Playlists
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="@Url.Action("Index", "Biblioteca", new { tipo = "albums" })">
+                    <i class="bi bi-disc"></i> Álbumes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="@Url.Action("Index", "Biblioteca", new { tipo = "pistas" })">
+                    <i class="bi bi-music-note"></i> Canciones
+                </a>
+            </li>
+        </ul>
+
+        @if (Model?.MisListas?.Any() == true)
+        {
+            <!-- My Playlists -->
+            <div class="mb-5">
+                <h3 class="mb-3">Mis Playlists</h3>
+                <div class="row">
+                    @foreach (var lista in Model.MisListas)
+                    {
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card">
+                                <div
+                                    style="width: 100%; height: 200px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 8px 8px 0 0; position: relative;">
+                                    <div class="position-absolute bottom-0 end-0 p-2">
+                                        <div class="btn-group dropstart">
+                                            <button class="btn btn-dark btn-sm" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item"
+                                                        href="@Url.Action("Editar", "Playlist", new { id = lista.Id })">
+                                                        <i class="bi bi-pencil"></i> Editar
+                                                    </a></li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li><a class="dropdown-item text-danger" href="#"
+                                                        onclick="eliminarPlaylist(@lista.Id)">
+                                                        <i class="bi bi-trash"></i> Eliminar
+                                                    </a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">@lista.Nombre</h5>
+                                    <p class="card-text text-muted">
+                                        @(lista.ListasPista?.Count() ?? 0) canciones
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="@Url.Action("Detalle", "Playlist", new { id = lista.Id })"
+                                            class="btn btn-primary btn-sm">Ver</a>
+                                        @if (lista.Publica)
+                                        {
+                                            <span class="badge bg-success">Pública</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Privada</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model?.AlbumsGuardados?.Any() == true)
+        {
+            <!-- Saved Albums -->
+            <div class="mb-5">
+                <h3 class="mb-3">Álbumes Guardados</h3>
+                <div class="row">
+                    @foreach (var album in Model.AlbumsGuardados)
+                    {
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card">
+                                <div
+                                    style="width: 100%; height: 200px; background: linear-gradient(135deg, var(--success), var(--info)); border-radius: 8px 8px 0 0;">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">@album.Titulo</h5>
+                                    <p class="card-text text-muted">@album.Usuario?.Nombre</p>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            @(album.FechaLanzamiento?.Year ?? DateTime.Now.Year) • @(album.Pistas?.Count() ?? 0)
+                                            canciones
+                                        </small>
+                                    </p>
+                                    <div class="d-flex justify-content-between">
+                                        <a href="@Url.Action("Detalle", "Album", new { id = album.Id })"
+                                            class="btn btn-primary btn-sm">Ver</a>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="quitarAlbum(@album.Id)">
+                                            <i class="bi bi-heart-fill"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model?.PistasGuardadas?.Any() == true)
+        {
+            <!-- Liked Songs -->
+            <div class="mb-5">
+                <h3 class="mb-3">Canciones que te gustan</h3>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th width="50">#</th>
+                                <th>Título</th>
+                                <th>Artista</th>
+                                <th>Álbum</th>
+                                <th>Duración</th>
+                                <th width="100">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int index = 1;
+                            }
+                            @foreach (var pista in Model.PistasGuardadas)
+                            {
+                                <tr>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-play-fill"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div
+                                                style="width: 40px; height: 40px; background: var(--accent); border-radius: 4px; margin-right: 12px;">
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@pista.Titulo</div>
+                                                @if (pista.EsExplicita)
+                                                {
+                                                    <span class="badge bg-secondary">E</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@pista.Usuario?.Nombre</td>
+                                    <td>@pista.Album?.Titulo</td>
+                                    <td>@pista.Duracion.ToString(@"mm\:ss")</td>
+                                    <td>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="quitarPista(@pista.Id)"
+                                            title="Quitar de favoritos">
+                                            <i class="bi bi-heart-fill"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if ((Model?.MisListas?.Any() != true) && (Model?.AlbumsGuardados?.Any() != true) &&
+                (Model?.PistasGuardadas?.Any() != true))
+        {
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <i class="bi bi-collection" style="font-size: 4rem; color: var(--ui-text-color);"></i>
+                <h3 class="mt-3">Tu biblioteca está vacía</h3>
+                <p class="text-muted mb-4">Empieza a guardar música y crear playlists para verlas aquí.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="@Url.Action("Index", "Busqueda")" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i> Buscar Música
+                    </a>
+                    <a href="@Url.Action("CrearLista", "Playlist")" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> Crear Playlist
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function eliminarPlaylist(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta playlist?')) {
+                fetch(`/Playlist/Eliminar/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Error al eliminar la playlist');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al eliminar la playlist');
+                    });
+            }
+        }
+
+        function quitarAlbum(id) {
+            fetch(`/Biblioteca/QuitarAlbum/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error al quitar el álbum');
+                    }
+                });
+        }
+
+        function quitarPista(id) {
+            fetch(`/Biblioteca/QuitarPista/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error al quitar la canción');
+                    }
+                });
+        }
+    </script>
+}

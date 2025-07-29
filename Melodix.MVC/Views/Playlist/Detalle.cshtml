@@ -1,0 +1,248 @@
+@model PlaylistViewModel
+@{
+    ViewData["Title"] = Model.Nombre;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex align-items-end mb-4">
+                <div class="playlist-cover me-4">
+                    <div class="bg-gradient-primary d-flex align-items-center justify-content-center" style="width: 232px; height: 232px; border-radius: 8px;">
+                        <i class="bi bi-music-note-list text-white" style="font-size: 80px;"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-muted mb-2">Lista de reproducción</p>
+                    <h1 class="display-4 fw-bold mb-3">@Model.Nombre</h1>
+                    @if (!string.IsNullOrEmpty(Model.Descripcion))
+                    {
+                        <p class="text-muted mb-3">@Model.Descripcion</p>
+                    }
+                    <div class="d-flex align-items-center">
+                        <img src="@(Model.Propietario?.FotoPerfil ?? "/images/default-avatar.png")" 
+                             alt="@Model.Propietario?.Nombre" 
+                             class="rounded-circle me-2" 
+                             style="width: 24px; height: 24px;">
+                        <span class="fw-semibold">@Model.Propietario?.Nombre</span>
+                        <span class="text-muted mx-2">•</span>
+                        <span class="text-muted">@Model.Pistas.Count canciones</span>
+                        @if (Model.TotalDuracion > 0)
+                        {
+                            <span class="text-muted mx-2">•</span>
+                            <span class="text-muted">@TimeSpan.FromSeconds(Model.TotalDuracion).ToString(@"mm\:ss")</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-success rounded-circle me-3" style="width: 56px; height: 56px;">
+                    <i class="bi bi-play-fill fs-4"></i>
+                </button>
+                @if (!Model.EsPropietario)
+                {
+                    <button class="btn btn-outline-light me-3" onclick="toggleSeguir(@Model.Id)">
+                        <i class="bi bi-heart me-2"></i>
+                        <span id="seguir-text">Seguir</span>
+                    </button>
+                }
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        @if (Model.EsPropietario)
+                        {
+                            <li><a class="dropdown-item" href="@Url.Action("Editar", new { id = Model.Id })">
+                                <i class="bi bi-pencil me-2"></i>Editar detalles
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="eliminarPlaylist(@Model.Id)">
+                                <i class="bi bi-trash me-2"></i>Eliminar playlist
+                            </a></li>
+                        }
+                        else
+                        {
+                            <li><a class="dropdown-item" href="#" onclick="reportarPlaylist(@Model.Id)">
+                                <i class="bi bi-flag me-2"></i>Reportar
+                            </a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            @if (Model.Pistas.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="border-bottom border-secondary">
+                                <th scope="col" class="text-muted" style="width: 50px;">#</th>
+                                <th scope="col" class="text-muted">Título</th>
+                                <th scope="col" class="text-muted">Álbum</th>
+                                <th scope="col" class="text-muted">Fecha agregada</th>
+                                <th scope="col" class="text-muted text-end" style="width: 120px;">
+                                    <i class="bi bi-clock"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Pistas.Count; i++)
+                            {
+                                var pista = Model.Pistas[i];
+                                <tr class="pista-row" data-pista-id="@pista.Id">
+                                    <td class="align-middle">
+                                        <button class="btn btn-link p-0 play-btn" onclick="reproducirPista(@pista.Id, @Model.Id)">
+                                            <span class="track-number">@(i + 1)</span>
+                                            <i class="bi bi-play-fill play-icon d-none"></i>
+                                        </button>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(pista.Album?.UrlPortada ?? pista.Album?.RutaImagen ?? "/images/default-album.png")" 
+                                                 alt="@pista.Album?.Titulo" 
+                                                 class="me-3" 
+                                                 style="width: 40px; height: 40px; border-radius: 4px;">
+                                            <div>
+                                                <div class="fw-medium">@pista.Titulo</div>
+                                                <div class="text-muted small">@pista.Album?.Usuario?.Nombre</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle text-muted">
+                                        <a href="@Url.Action("Detalle", "Album", new { id = pista.Album?.Id })" 
+                                           class="text-decoration-none text-muted">@pista.Album?.Titulo</a>
+                                    </td>
+                                    <td class="align-middle text-muted">@pista.CreadoEn.ToString("dd MMM yyyy")</td>
+                                    <td class="align-middle text-end">
+                                        <div class="d-flex align-items-center justify-content-end">
+                                            <button class="btn btn-sm btn-outline-light me-2" onclick="toggleLike(@pista.Id)">
+                                                <i class="bi bi-heart"></i>
+                                            </button>
+                                            <span class="text-muted small">@TimeSpan.FromSeconds(pista.Duracion).ToString(@"m\:ss")</span>
+                                            @if (Model.EsPropietario)
+                                            {
+                                                <div class="dropdown ms-2">
+                                                    <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item text-danger" href="#" onclick="quitarDeLista(@Model.Id, @pista.Id)">
+                                                            <i class="bi bi-trash me-2"></i>Quitar de esta lista
+                                                        </a></li>
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-music-note-list text-muted mb-3" style="font-size: 64px;"></i>
+                    <h4 class="text-muted mb-3">Tu playlist está vacía</h4>
+                    <p class="text-muted mb-4">Busca canciones y álbumes para agregar a esta playlist.</p>
+                    <a href="@Url.Action("Index", "Busqueda")" class="btn btn-primary">
+                        Buscar música
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+function reproducirPista(pistaId, listaId) {
+    // Implementar reproducción
+    console.log('Reproducir pista', pistaId, 'de lista', listaId);
+}
+
+function toggleLike(pistaId) {
+    // Implementar like/unlike
+    console.log('Toggle like pista', pistaId);
+}
+
+function toggleSeguir(listaId) {
+    fetch('@Url.Action("ToggleSeguir")', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        },
+        body: JSON.stringify({ listaId: listaId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const text = document.getElementById('seguir-text');
+            text.textContent = data.estaSiguiendo ? 'Siguiendo' : 'Seguir';
+        }
+    });
+}
+
+function quitarDeLista(listaId, pistaId) {
+    if (confirm('¿Estás seguro de que quieres quitar esta canción de la playlist?')) {
+        fetch('@Url.Action("QuitarPista")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            body: JSON.stringify({ listaId: listaId, pistaId: pistaId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function eliminarPlaylist(listaId) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta playlist? Esta acción no se puede deshacer.')) {
+        fetch('@Url.Action("Eliminar")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            body: JSON.stringify({ id: listaId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '@Url.Action("Index", "Biblioteca")';
+            }
+        });
+    }
+}
+
+// Hover effects para las filas de la tabla
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('.pista-row');
+    rows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            const trackNumber = this.querySelector('.track-number');
+            const playIcon = this.querySelector('.play-icon');
+            trackNumber.classList.add('d-none');
+            playIcon.classList.remove('d-none');
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            const trackNumber = this.querySelector('.track-number');
+            const playIcon = this.querySelector('.play-icon');
+            trackNumber.classList.remove('d-none');
+            playIcon.classList.add('d-none');
+        });
+    });
+});
+</script>
+
+@Html.AntiForgeryToken()

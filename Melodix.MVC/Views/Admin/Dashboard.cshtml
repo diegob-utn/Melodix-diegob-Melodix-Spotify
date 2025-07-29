@@ -1,0 +1,195 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">Panel de Administración</h1>
+                <div class="text-muted">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Administrador: @User.Identity?.Name
+                </div>
+            </div>
+
+            <!-- Estadísticas generales -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Usuarios</h6>
+                                    <h3 class="mb-0">@Model.TotalUsuarios</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-people fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Pistas</h6>
+                                    <h3 class="mb-0">@Model.TotalPistas</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-music-note fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Álbumes</h6>
+                                    <h3 class="mb-0">@Model.TotalAlbumes</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-disc fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Listas</h6>
+                                    <h3 class="mb-0">@Model.TotalListas</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-music-note-list fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones rápidas -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-header border-secondary">
+                            <h5 class="card-title mb-0">Acciones rápidas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-lg-3 col-md-6">
+                                    <a href="@Url.Action("Usuarios")" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i class="bi bi-people fs-2 mb-2"></i>
+                                        <span>Gestionar Usuarios</span>
+                                    </a>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <a href="@Url.Action("Contenido")" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i class="bi bi-music-note fs-2 mb-2"></i>
+                                        <span>Gestionar Contenido</span>
+                                    </a>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <a href="@Url.Action("Generos")" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i class="bi bi-tags fs-2 mb-2"></i>
+                                        <span>Gestionar Géneros</span>
+                                    </a>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <a href="@Url.Action("Reportes")" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                                        <i class="bi bi-graph-up fs-2 mb-2"></i>
+                                        <span>Ver Reportes</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividad reciente -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Usuarios recientes</h5>
+                            <a href="@Url.Action("Usuarios")" class="btn btn-outline-primary btn-sm">Ver todos</a>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.UltimosUsuarios.Any())
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var usuario in Model.UltimosUsuarios.Take(5))
+                                    {
+                                        <div class="list-group-item bg-transparent border-secondary d-flex align-items-center">
+                                            <img src="/images/default-avatar.png" 
+                                                 alt="@usuario.Nombre" 
+                                                 class="rounded-circle me-3" 
+                                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">@usuario.Nombre</h6>
+                                                <small class="text-muted">@usuario.Email</small>
+                                            </div>
+                                            <small class="text-muted">@usuario.FechaRegistro?.ToString("dd/MM/yyyy")</small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No hay usuarios recientes</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Contenido popular</h5>
+                            <a href="@Url.Action("Contenido")" class="btn btn-outline-primary btn-sm">Ver todo</a>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.PistasMasPopulares.Any())
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var pista in Model.PistasMasPopulares.Take(5))
+                                    {
+                                        <div class="list-group-item bg-transparent border-secondary d-flex align-items-center">
+                                            <img src="@(pista.Album?.UrlPortada ?? pista.Album?.RutaImagen ?? "/images/default-album.png")" 
+                                                 alt="@pista.Titulo" 
+                                                 class="me-3" 
+                                                 style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">@pista.Titulo</h6>
+                                                <small class="text-muted">@pista.Album?.Usuario?.Nombre</small>
+                                            </div>
+                                            <small class="text-muted">@pista.CreadoEn.ToString("dd/MM/yyyy")</small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No hay contenido popular</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

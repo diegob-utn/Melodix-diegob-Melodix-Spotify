@@ -1,0 +1,423 @@
+@model Melodix.MVC.ViewModels.PerfilUsuarioViewModel
+
+@{
+    ViewData["Title"] = Model?.EsPropioUsuario == true ? "Mi Perfil" : $"Perfil de {Model?.Usuario?.Nombre}";
+}
+
+<div class="row">
+    <div class="col-12">
+        <!-- Profile Header -->
+        <div class="card mb-4" style="background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);">
+            <div class="card-body p-5">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <div style="width: 150px; height: 150px; background: var(--panel-bg); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.2);">
+                            @if (!string.IsNullOrEmpty(Model?.Usuario?.FotoPerfil))
+                            {
+                                <img src="@Model.Usuario.FotoPerfil" alt="Foto de perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <i class="bi bi-person" style="font-size: 4rem; color: var(--ui-text-color);"></i>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="text-white">
+                            <h1 class="display-4 fw-bold mb-2">@Model?.Usuario?.Nombre</h1>
+                            <p class="h5 mb-3">@@@Model?.Usuario?.Nick</p>
+                            
+                            @if (!string.IsNullOrEmpty(Model?.Usuario?.Biografia))
+                            {
+                                <p class="lead">@Model.Usuario.Biografia</p>
+                            }
+                            
+                            <div class="d-flex align-items-center gap-4 mt-3">
+                                <div>
+                                    <span class="h4 fw-bold">@Model?.TotalSeguidores</span>
+                                    <span class="text-light">seguidores</span>
+                                </div>
+                                <div>
+                                    <span class="h4 fw-bold">@Model?.TotalSiguiendo</span>
+                                    <span class="text-light">siguiendo</span>
+                                </div>
+                                @if (User.IsInRole("Musico") || Model?.Usuario?.Id == ViewContext.HttpContext.User.FindFirst("sub")?.Value)
+                                {
+                                    <div>
+                                        <span class="h4 fw-bold">@Model?.TotalPistas</span>
+                                        <span class="text-light">canciones</span>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="mt-4">
+                                @if (Model?.EsPropioUsuario == true)
+                                {
+                                    <a href="@Url.Action("Editar", "Perfil")" class="btn btn-light btn-lg">
+                                        <i class="bi bi-pencil"></i> Editar perfil
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-light btn-lg me-2" onclick="seguirUsuario('@Model?.Usuario?.Id')">
+                                        <i class="bi bi-person-plus"></i> Seguir
+                                    </button>
+                                    <button class="btn btn-outline-light btn-lg">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Tabs -->
+        <ul class="nav nav-pills mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview" type="button" role="tab">
+                    <i class="bi bi-grid"></i> Resumen
+                </button>
+            </li>
+            @if (Model?.PistasPublicas?.Any() == true || Model?.EsPropioUsuario == true)
+            {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="music-tab" data-bs-toggle="pill" data-bs-target="#music" type="button" role="tab">
+                        <i class="bi bi-music-note"></i> Música
+                    </button>
+                </li>
+            }
+            @if (Model?.PlaylistsPublicas?.Any() == true || Model?.EsPropioUsuario == true)
+            {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="playlists-tab" data-bs-toggle="pill" data-bs-target="#playlists" type="button" role="tab">
+                        <i class="bi bi-collection-play"></i> Playlists
+                    </button>
+                </li>
+            }
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="activity-tab" data-bs-toggle="pill" data-bs-target="#activity" type="button" role="tab">
+                    <i class="bi bi-clock-history"></i> Actividad
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="profileTabsContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Recent Activity -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-clock-history"></i> Actividad Reciente
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model?.ActividadReciente?.Any() == true)
+                                {
+                                    @foreach (var actividad in Model.ActividadReciente.Take(5))
+                                    {
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div style="width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                                <i class="bi bi-music-note text-dark"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold">Nueva canción agregada</div>
+                                                <div class="text-muted small">@actividad</div>
+                                            </div>
+                                            <div class="text-muted small">
+                                                Hace 2 horas
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center py-4">
+                                        <i class="bi bi-clock-history" style="font-size: 2rem; color: var(--ui-text-color);"></i>
+                                        <p class="text-muted mt-2">No hay actividad reciente</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- User Info -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-info-circle"></i> Información
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrEmpty(Model?.Usuario?.Ubicacion))
+                                {
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="bi bi-geo-alt me-2" style="color: var(--primary);"></i>
+                                        <span>@Model.Usuario.Ubicacion</span>
+                                    </div>
+                                }
+                                
+                                @if (Model?.Usuario?.FechaNacimiento.HasValue == true)
+                                {
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="bi bi-calendar me-2" style="color: var(--accent);"></i>
+                                        <span>@Model.Usuario.FechaNacimiento.Value.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                }
+                                
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-person-check me-2" style="color: var(--success);"></i>
+                                    <span>Miembro desde @(Model?.Usuario?.CreadoEn?.ToString("MMM yyyy") ?? "N/A")</span>
+                                </div>
+                                
+                                @if (Model?.EsArtista == true)
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-music-note me-2" style="color: var(--warning);"></i>
+                                        <span>Artista verificado</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Top Genres -->
+                        @if (Model?.GenerosPreferidos?.Any() == true)
+                        {
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-tags"></i> Géneros Favoritos
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    @foreach (var genero in Model.GenerosPreferidos.Take(5))
+                                    {
+                                        <span class="badge bg-primary me-2 mb-2">@genero</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Music Tab -->
+            @if (Model?.PistasPublicas?.Any() == true || Model?.EsPropioUsuario == true)
+            {
+                <div class="tab-pane fade" id="music" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-music-note-beamed"></i> 
+                                @(Model?.EsPropioUsuario == true ? "Mis Canciones" : "Canciones Públicas")
+                            </h5>
+                            @if (Model?.EsPropioUsuario == true && User.IsInRole("Musico"))
+                            {
+                                <a href="@Url.Action("SubirPista", "Artista")" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-lg"></i> Subir Canción
+                                </a>
+                            }
+                        </div>
+                        <div class="card-body p-0">
+                            @if (Model?.PistasPublicas?.Any() == true)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">#</th>
+                                                <th>Título</th>
+                                                <th>Álbum</th>
+                                                <th>Duración</th>
+                                                <th>Reproducciones</th>
+                                                <th width="100">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{int index = 1;}
+                                            @foreach (var pista in Model.PistasPublicas.Take(10))
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <button class="btn btn-outline-primary btn-sm">
+                                                            <i class="bi bi-play-fill"></i>
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div style="width: 40px; height: 40px; background: var(--accent); border-radius: 4px; margin-right: 12px;"></div>
+                                                            <div>
+                                                                <div class="fw-bold">@pista.Titulo</div>
+                                                                @if (pista.EsExplicita)
+                                                                {
+                                                                    <span class="badge bg-secondary">E</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>@pista.Album?.Titulo</td>
+                                                    <td>@pista.Duracion.ToString(@"mm\:ss")</td>
+                                                    <td>@pista.ContadorReproducciones.ToString("N0")</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button class="btn btn-outline-secondary" title="Me gusta">
+                                                                <i class="bi bi-heart"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary" title="Más opciones">
+                                                                <i class="bi bi-three-dots"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                index++;
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center p-5">
+                                    <i class="bi bi-music-note" style="font-size: 3rem; color: var(--ui-text-color);"></i>
+                                    <h5 class="mt-3">No hay canciones públicas</h5>
+                                    <p class="text-muted">
+                                        @(Model?.EsPropioUsuario == true ? "Sube tu primera canción para empezar" : "Este usuario no ha publicado canciones aún")
+                                    </p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Playlists Tab -->
+            @if (Model?.PlaylistsPublicas?.Any() == true || Model?.EsPropioUsuario == true)
+            {
+                <div class="tab-pane fade" id="playlists" role="tabpanel">
+                    <div class="row">
+                        @if (Model?.PlaylistsPublicas?.Any() == true)
+                        {
+                            @foreach (var playlist in Model.PlaylistsPublicas)
+                            {
+                                <div class="col-md-4 col-sm-6 mb-3">
+                                    <div class="card">
+                                        <div style="width: 100%; height: 200px; background: linear-gradient(135deg, var(--info), var(--danger)); border-radius: 8px 8px 0 0;"></div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">@playlist.Nombre</h5>
+                                            <p class="card-text text-muted">@playlist.ListasPista?.Count() canciones</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <a href="@Url.Action("Detalle", "Playlist", new { id = playlist.Id })" class="btn btn-primary btn-sm">Ver</a>
+                                                <span class="badge bg-success">Pública</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <div class="text-center p-5">
+                                    <i class="bi bi-collection-play" style="font-size: 3rem; color: var(--ui-text-color);"></i>
+                                    <h5 class="mt-3">No hay playlists públicas</h5>
+                                    <p class="text-muted">
+                                        @(Model?.EsPropioUsuario == true ? "Crea tu primera playlist pública" : "Este usuario no ha creado playlists públicas")
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Activity Tab -->
+            <div class="tab-pane fade" id="activity" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-graph-up"></i> Estadísticas de Actividad
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <i class="bi bi-play-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                                        <h4 class="mt-2">@Model?.TotalReproducciones</h4>
+                                        <p class="text-muted">Reproducciones</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <i class="bi bi-heart" style="font-size: 2rem; color: var(--error);"></i>
+                                        <h4 class="mt-2">@Model?.TotalLikes</h4>
+                                        <p class="text-muted">Me gusta</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <i class="bi bi-collection-play" style="font-size: 2rem; color: var(--accent);"></i>
+                                        <h4 class="mt-2">@Model?.TotalPlaylists</h4>
+                                        <p class="text-muted">Playlists</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <i class="bi bi-calendar-check" style="font-size: 2rem; color: var(--success);"></i>
+                                        <h4 class="mt-2">@((Model?.Usuario?.CreadoEn.HasValue == true ? (DateTime.Now - Model.Usuario.CreadoEn.Value).Days : 0))</h4>
+                                        <p class="text-muted">Días activo</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function seguirUsuario(userId) {
+            fetch(`/Perfil/Seguir`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify({ userId: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update follow button
+                    const btn = event.target.closest('button');
+                    btn.innerHTML = '<i class="bi bi-person-check"></i> Siguiendo';
+                    btn.classList.remove('btn-light');
+                    btn.classList.add('btn-outline-light');
+                } else {
+                    alert(data.message || 'Error al seguir usuario');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al seguir usuario');
+            });
+        }
+    </script>
+}

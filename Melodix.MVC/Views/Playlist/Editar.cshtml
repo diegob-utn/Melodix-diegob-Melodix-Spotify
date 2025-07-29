@@ -1,0 +1,122 @@
+@model PlaylistViewModel
+@{
+    ViewData["Title"] = "Editar playlist";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary">
+                    <h4 class="card-title mb-0">Editar playlist</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Editar" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label">Nombre de la playlist</label>
+                            <input asp-for="Nombre" class="form-control bg-dark border-secondary text-light" 
+                                   placeholder="Mi playlist #1" maxlength="100" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Descripcion" class="form-label">Descripción (opcional)</label>
+                            <textarea asp-for="Descripcion" class="form-control bg-dark border-secondary text-light" 
+                                      rows="3" placeholder="Agrega una descripción opcional" maxlength="255"></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="Publica" class="form-check-input" type="checkbox" />
+                                <label asp-for="Publica" class="form-check-label">
+                                    Hacer playlist pública
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Las playlists públicas pueden ser vistas y seguidas por otros usuarios
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="Colaborativa" class="form-check-input" type="checkbox" />
+                                <label asp-for="Colaborativa" class="form-check-label">
+                                    Hacer playlist colaborativa
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Otros usuarios podrán agregar y quitar canciones de esta playlist
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Detalle", new { id = Model.Id })" class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Auto-focus en el campo nombre
+        document.addEventListener('DOMContentLoaded', function() {
+            const nombreInput = document.querySelector('input[name="Nombre"]');
+            nombreInput.focus();
+            nombreInput.select();
+        });
+
+        // Contador de caracteres para descripción
+        const descripcionTextarea = document.querySelector('textarea[name="Descripcion"]');
+        if (descripcionTextarea) {
+            const maxLength = 255;
+            const counterDiv = document.createElement('div');
+            counterDiv.className = 'text-muted small mt-1';
+            
+            const updateCounter = () => {
+                const currentLength = descripcionTextarea.value.length;
+                counterDiv.innerHTML = `<span id="char-count">${currentLength}</span>/${maxLength} caracteres`;
+                
+                if (currentLength > maxLength * 0.9) {
+                    counterDiv.className = 'text-warning small mt-1';
+                } else {
+                    counterDiv.className = 'text-muted small mt-1';
+                }
+            };
+            
+            updateCounter();
+            descripcionTextarea.parentNode.appendChild(counterDiv);
+            descripcionTextarea.addEventListener('input', updateCounter);
+        }
+
+        // Lógica para colaborativa requiere pública
+        const publicaCheckbox = document.querySelector('input[name="Publica"]');
+        const colaborativaCheckbox = document.querySelector('input[name="Colaborativa"]');
+
+        colaborativaCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                publicaCheckbox.checked = true;
+            }
+        });
+
+        publicaCheckbox.addEventListener('change', function() {
+            if (!this.checked) {
+                colaborativaCheckbox.checked = false;
+            }
+        });
+    </script>
+}

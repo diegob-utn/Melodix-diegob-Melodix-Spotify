@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Acceso denegado";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="py-5">
+                <i class="bi bi-shield-exclamation text-warning mb-4" style="font-size: 80px;"></i>
+                <h1 class="display-4 mb-3">Acceso denegado</h1>
+                <p class="lead text-muted mb-4">
+                    No tienes permisos para acceder a esta página o realizar esta acción.
+                </p>
+                <p class="text-muted mb-4">
+                    Si crees que esto es un error, contacta al administrador del sistema o inicia sesión con una cuenta que tenga los permisos necesarios.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <a href="@Url.Action("Index", "Inicio")" class="btn btn-primary">
+                        <i class="bi bi-house me-2"></i>
+                        Ir al inicio
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Volver atrás
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

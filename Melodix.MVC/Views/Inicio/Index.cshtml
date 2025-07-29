@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">¡Hola, @User.Identity.Name!</h1>
+        
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-search" style="font-size: 2rem; color: var(--primary);"></i>
+                        <h5 class="card-title mt-3">Buscar Música</h5>
+                        <p class="card-text text-muted">Encuentra tus canciones favoritas</p>
+                        <a href="@Url.Action("Index", "Busqueda")" class="btn btn-outline-primary">Buscar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-collection" style="font-size: 2rem; color: var(--accent);"></i>
+                        <h5 class="card-title mt-3">Tu Biblioteca</h5>
+                        <p class="card-text text-muted">Accede a tu música guardada</p>
+                        <a href="@Url.Action("Index", "Biblioteca")" class="btn btn-outline-primary">Ver Biblioteca</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-plus-square" style="font-size: 2rem; color: var(--success);"></i>
+                        <h5 class="card-title mt-3">Crear Playlist</h5>
+                        <p class="card-text text-muted">Organiza tu música</p>
+                        <a href="@Url.Action("CrearLista", "Playlist")" class="btn btn-outline-primary">Crear</a>
+                    </div>
+                </div>
+            </div>
+            @if (User.IsInRole("Musico"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-music-note" style="font-size: 2rem; color: var(--warning);"></i>
+                            <h5 class="card-title mt-3">Sube tu Música</h5>
+                            <p class="card-text text-muted">Comparte tus creaciones</p>
+                            <a href="@Url.Action("SubirPista", "Artista")" class="btn btn-outline-primary">Subir</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Recently Played -->
+        <div class="mb-5">
+            <h3 class="mb-3">Reproducido recientemente</h3>
+            <div class="row">
+                @for (int i = 0; i < 6; i++)
+                {
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <div class="card">
+                            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 8px 8px 0 0;"></div>
+                            <div class="card-body p-3">
+                                <h6 class="card-title mb-1" style="font-size: 0.9rem;">Canción @(i + 1)</h6>
+                                <p class="card-text text-muted" style="font-size: 0.8rem;">Artista @(i + 1)</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Recommended for you -->
+        <div class="mb-5">
+            <h3 class="mb-3">Recomendado para ti</h3>
+            <div class="row">
+                @for (int i = 0; i < 8; i++)
+                {
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card">
+                            <div class="row g-0">
+                                <div class="col-4">
+                                    <div style="width: 100%; height: 80px; background: linear-gradient(135deg, var(--success), var(--info)); border-radius: 8px 0 0 8px;"></div>
+                                </div>
+                                <div class="col-8">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1" style="font-size: 0.8rem;">Playlist @(i + 1)</h6>
+                                        <p class="card-text text-muted" style="font-size: 0.7rem;">Mix personalizado</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Genres -->
+        <div>
+            <h3 class="mb-3">Explorar por género</h3>
+            <div class="row">
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card" style="background: linear-gradient(135deg, #ff006e, #fb5607);">
+                        <div class="card-body text-center p-4">
+                            <h5 class="text-white">Pop</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card" style="background: linear-gradient(135deg, #8338ec, #3a86ff);">
+                        <div class="card-body text-center p-4">
+                            <h5 class="text-white">Rock</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card" style="background: linear-gradient(135deg, #06ffa5, #90e0ef);">
+                        <div class="card-body text-center p-4">
+                            <h5 class="text-dark">Electrónica</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card" style="background: linear-gradient(135deg, #ffbe0b, #f77f00);">
+                        <div class="card-body text-center p-4">
+                            <h5 class="text-dark">Hip Hop</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card" style="background: linear-gradient(135deg, #c77dff, #e0aaff);">
+                        <div class="card-body text-center p-4">
+                            <h5 class="text-dark">Jazz</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="card" style="background: linear-gradient(135deg, #f72585, #4cc9f0);">
+                        <div class="card-body text-center p-4">
+                            <h5 class="text-white">Clásica</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -16,9 +16,9 @@ namespace Melodix.Models
   // Enums
   public enum RolUsuario
   {
-    Usuario = 0,
-    Musico = 1,
-    Admin = 2
+    Usuario = 1,
+    Musico = 2,
+    Admin = 3
   }
 
   public enum TipoObjetoLike
@@ -97,11 +97,7 @@ namespace Melodix.Models
     public string UrlPortada { get; set; }
     public string SpotifyAlbumId { get; set; }
 
-    // FKs
-    public int ArtistaId { get; set; }
-
     // Navegadores
-    public Artista Artista { get; set; }
     public List<Pista> Pistas { get; set; } = new();
     public List<UsuarioLikeAlbum> UsuarioLikeAlbums { get; set; } = new();
   }
@@ -152,7 +148,6 @@ namespace Melodix.Models
     public List<UsuarioLikeAlbum> UsuarioLikeAlbums { get; set; } = new();
     public List<UsuarioLikeLista> UsuarioLikeListas { get; set; } = new();
     public List<UsuarioLikePista> UsuarioLikePistas { get; set; } = new();
-    public List<UsuarioSigueArtista> UsuarioSigueArtistas { get; set; } = new();
     public List<UsuarioSigueLista> UsuarioSigueListas { get; set; } = new();
     public List<HistorialLike> HistorialLikes { get; set; } = new();
     public List<SuscripcionUsuario> SuscripcionUsuarios { get; set; } = new();
@@ -211,20 +206,7 @@ namespace Melodix.Models
     public virtual ApplicationUser Usuario { get; set; }
   }
 
-  // Música, álbumes, artistas, listas y pistas
-  public class Artista
-  {
-    // Necesarios
-    public int Id { get; set; }
-    public string Nombre { get; set; }
-    public string SpotifyArtistaId { get; set; }
-    public string UrlImagen { get; set; }
 
-    // Navegadores
-    public List<Pista> Pistas { get; set; } = new();
-    public List<Album> Albumes { get; set; } = new();
-    public List<UsuarioSigueArtista> UsuariosQueSiguen { get; set; } = new();
-  }
 
   public class HistorialEscucha
   {
@@ -323,17 +305,12 @@ namespace Melodix.Models
     public int Duracion { get; set; }
     public DateTime CreadoEn { get; set; }
     public DateTime ActualizadoEn { get; set; }
-    public string Artista { get; set; }
     public string Album { get; set; }
     public string UrlPortada { get; set; }
     public DateTime? FechaLanzamiento { get; set; }
     public string SpotifyPistaId { get; set; }
 
-    // FKs
-    public int ArtistaId { get; set; }
-
     // Navegadores
-    public Artista ArtistaNav { get; set; }
     public List<ListaPista> ListaPistas { get; set; } = new();
     public List<HistorialEscucha> HistorialEscuchas { get; set; } = new();
     public List<UsuarioLikePista> UsuarioLikePistas { get; set; } = new();
@@ -498,21 +475,7 @@ namespace Melodix.Models
     public ApplicationUser Seguido { get; set; }
   }
 
-  // Muchos a muchos: Usuario <-> Artista (seguimiento)
-  public class UsuarioSigueArtista
-  {
-    // Necesarios
-    public int Id { get; set; }
-    public DateTime CreadoEn { get; set; }
 
-    // FKs
-    public string UsuarioId { get; set; }
-    public int ArtistaId { get; set; }
-
-    // Navegadores
-    public ApplicationUser Usuario { get; set; }
-    public Artista Artista { get; set; }
-  }
 
   // Muchos a muchos: Usuario <-> ListaReproduccion (seguimiento)
   public class UsuarioSigueLista
